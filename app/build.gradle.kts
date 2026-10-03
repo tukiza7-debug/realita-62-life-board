@@ -20,13 +20,13 @@ android {
 
     signingConfigs {
         create("release") {
-            // Signing credentials injected via environment in CI (see .github/workflows/build-apk.yml)
+            // Signing credentials injected via environment in CI (see .github/workflows/build-apk.yml).
             // For local builds, set REALITA_KEYSTORE_FILE / REALITA_KEYSTORE_PASSWORD / REALITA_KEY_ALIAS / REALITA_KEY_PASSWORD.
-            val keystoreFile = System.getenv("REALITA_KEYSTORE_FILE")
-                ?: System.getProperty("realita.keystore.file")
-            val storePass = System.getenv("REALITA_KEYSTORE_PASSWORD")
-            val keyAlias = System.getenv("REALITA_KEY_ALIAS")
-            val keyPass = System.getenv("REALITA_KEY_PASSWORD")
+            // Only configure the release signing config if ALL FOUR env vars are present AND non-empty.
+            val keystoreFile = System.getenv("REALITA_KEYSTORE_FILE")?.takeIf { it.isNotEmpty() }
+            val storePass = System.getenv("REALITA_KEYSTORE_PASSWORD")?.takeIf { it.isNotEmpty() }
+            val keyAlias = System.getenv("REALITA_KEY_ALIAS")?.takeIf { it.isNotEmpty() }
+            val keyPass = System.getenv("REALITA_KEY_PASSWORD")?.takeIf { it.isNotEmpty() }
             if (keystoreFile != null && storePass != null && keyAlias != null && keyPass != null) {
                 storeFile = file(keystoreFile)
                 storePassword = storePass
@@ -49,12 +49,20 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // If a release keystore is configured, sign the APK with it.
-            // Otherwise fall back to debug signing so the build still produces an installable APK.
-            if ((System.getenv("REALITA_KEYSTORE_FILE") ?: "").isNotEmpty()) {
-                signingConfig = signingConfigs.getByName("release")
+            // Use the release keystore only if all four signing env vars are
+            // present AND non-empty. Otherwise fall back to debug signing so
+            // the build still produces an installable APK (CI without a
+            // configured keystore secret still ships a debug-signed APK).
+            val allSigningEnvPresent = listOf(
+                System.getenv("REALITA_KEYSTORE_FILE"),
+                System.getenv("REALITA_KEYSTORE_PASSWORD"),
+                System.getenv("REALITA_KEY_ALIAS"),
+                System.getenv("REALITA_KEY_PASSWORD")
+            ).all { !it.isNullOrEmpty() }
+            signingConfig = if (allSigningEnvPresent) {
+                signingConfigs.getByName("release")
             } else {
-                signingConfig = signingConfigs.getByName("debug")
+                signingConfigs.getByName("debug")
             }
         }
     }
