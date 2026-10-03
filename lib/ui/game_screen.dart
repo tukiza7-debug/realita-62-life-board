@@ -32,30 +32,96 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _loadGame() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString('saved_game');
-    if (saved == null) {
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/new_game');
-      }
+    SharedPreferences prefs;
+    try {
+      prefs = await SharedPreferences.getInstance();
+    } catch (e) {
+      // Prefs themselves are corrupt; show recovery dialog.
+      if (!mounted) return;
+      _showFatalDialog(
+        'Could not open saved data.',
+        detail: e.toString(),
+      );
       return;
     }
-    final c = await GameController.loadSaved(saved);
-    if (!mounted) return;
-    if (c == null) {
-      // Corrupted save — fall back to New Game screen.
-      await prefs.remove('saved_game');
+    final saved = prefs.getString('saved_game');
+    if (saved == null) {
       if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/new_game');
+      return;
+    }
+    GameController? c;
+    String? loadError;
+    try {
+      c = await GameController.loadSaved(saved);
+    } catch (e) {
+      // CardLibraryError or other unexpected — fall through to recovery.
+      c = null;
+      loadError = e.toString();
+    }
+    if (!mounted) return;
+    if (c == null) {
+      // Corrupted save — offer "Start new game" and clear it.
+      await prefs.remove('saved_game');
+      if (!mounted) return;
+      _showCorruptSaveDialog(loadError);
       return;
     }
     setState(() => _controller = c);
   }
 
+  void _showCorruptSaveDialog(String? detail) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Saved game is corrupted'),
+        content: Text(detail != null && detail.isNotEmpty
+            ? 'Details: $detail'
+            : 'The saved game state could not be read and was cleared.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.pushReplacementNamed(context, '/new_game');
+            },
+            child: const Text('Start new game'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFatalDialog(String message, {String? detail}) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Realita +62 cannot start'),
+        content: Text(detail != null ? '$message\n\n$detail' : message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.pushReplacementNamed(context, '/new_game');
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _autosave() async {
     if (_controller == null) return;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('saved_game', _controller!.serialize());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('saved_game', _controller!.serialize());
+    } catch (e) {
+      // Autosave failed (disk full, IO error, prefs corruption). Don't
+      // crash the running game; just log.
+      debugPrint('Autosave failed: $e');
+    }
   }
 
   @override

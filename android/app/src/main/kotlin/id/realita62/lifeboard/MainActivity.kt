@@ -1,4 +1,4 @@
-package id.realita62.realita62_life_board
+package id.realita62.lifeboard
 
 import io.flutter.embedding.android.FlutterActivity
 

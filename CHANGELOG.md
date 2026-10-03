@@ -3,6 +3,26 @@
 All notable changes to **Realita +62: Life Board** are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [2.0.1] — 2026-10-03
+
+### Fixed
+- Launch crash from `MainActivity` package mismatch. The activity was declared in `AndroidManifest.xml` as `.MainActivity` (resolves to `id.realita62.lifeboard.MainActivity` per the namespace in `android/app/build.gradle`), but the actual class lived at `id.realita62.realita62_life_board.MainActivity`. The app force-closed immediately on launch with `ClassNotFoundException`. Moved `MainActivity.kt` to `android/app/src/main/kotlin/id/realita62/lifeboard/MainActivity.kt` with `package id.realita62.lifeboard` and deleted the old directory.
+- Startup hardening so one bad piece of state cannot crash-loop the app. `lib/main.dart` now wraps `runApp` in `runZonedGuarded`, sets `FlutterError.onError`, and loads `SharedPreferences` once before `runApp` (the old `FutureBuilder` in `app.dart` could spin forever if `getInstance()` threw). `SettingsRepository.load()` returns defaults for any corrupt value (unknown enum, wrong-type stored under a key, prefs missing entirely). `GameController._loadCardLibrary` replaces the `assert()` count checks (stripped in release) with runtime validation that throws `CardLibraryError` on missing/invalid `assets/data/cards.json`. `GameScreen._loadGame` shows a recovery dialog with "Start new game" instead of silently navigating away when the saved game is corrupt. `MainMenuScreen._ContinueCard` and `SettingsScreen._confirmDelete` no longer leave a `TODO` in the path. A new `RecoveryScreen` is wired into `ErrorWidget.builder` and `RealitaApp` for any uncaught error before the UI is ready.
+- Release assets are now named `Realita62-LifeBoard-v<VERSION>-universal.apk`, `Realita62-LifeBoard-v<VERSION>-arm64-v8a.apk`, `Realita62-LifeBoard-v<VERSION>-armeabi-v7a.apk`, `Realita62-LifeBoard-v<VERSION>-x86_64.apk`, and `Realita62-LifeBoard-v<VERSION>-SHA256SUMS.txt` (the old `app-*release*.apk` names collided with the legacy Kotlin project's release artifacts and were ambiguous). `SHA256SUMS.txt` is generated AFTER renaming so the names inside the file match the published assets.
+
+### Added
+- CI step that fails the build if `MainActivity.kt` is not at the namespace path or its `package` declaration does not match the `namespace` in `android/app/build.gradle`.
+- CI step that runs `aapt dump badging` on the universal release APK and asserts the launchable activity is `id.realita62.lifeboard.MainActivity` and the package is `id.realita62.lifeboard`.
+- CI step that fails the release job if any old-named (`app-*release*.apk`) file remains in the build output after renaming.
+- Android emulator smoke test (`reactivecircus/android-emulator-runner@v2`) on API 34 / x86_64 that builds the debug APK, dumps the launchable activity via `aapt`, and runs `integration_test/launch_smoke_test.dart` to confirm the app actually reaches the main menu. The `build-apk` job is now gated on this smoke test passing.
+- Integration test: `integration_test/launch_smoke_test.dart` — pumps `RealitaApp` against a fresh `SharedPreferences` mock and asserts the main menu title and "New Game" button are visible.
+- Unit tests for corrupted state: `test/corrupted_state_test.dart` — 11 tests covering `SettingsRepository.load` against null prefs, empty prefs, unknown enum values, wrong-type values stored under bool/double keys, and round-trip save/load; `GameOrchestrator.deserialize` against invalid JSON and missing required fields; `CardLibrary.fromJson` empty arrays and `findById` fallback.
+
+### Changed
+- `lib/main.dart`, `lib/app.dart`, `lib/settings/settings_repository.dart`, `lib/state/game_controller.dart`, `lib/ui/game_screen.dart`, `lib/ui/main_menu_screen.dart`, `lib/ui/settings_screen.dart`, `lib/ui/recovery_screen.dart` (new).
+- `.github/workflows/build-flutter-apk.yml` — added the namespace check, the emulator smoke-test job, the `aapt dump badging` verification, the asset-renaming step, the SHA-after-rename step, the no-old-named-asset check, and updated the `softprops/action-gh-release files:` glob to `build/app/outputs/flutter-apk/Realita62-LifeBoard-v*`.
+- `README.md` and `README.id.md` — install and checksum examples now use the new asset names; documented the `INSTALL_FAILED_UPDATE_INCOMPATIBLE` risk when installing over an older differently-signed build with the same `applicationId`.
+
 ## [2.0.0] — 2026-10-03
 
 ### Added — Flutter port + brand + responsive + animation + settings rework

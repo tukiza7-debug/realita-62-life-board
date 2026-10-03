@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../app.dart';
 import '../settings/settings_repository.dart';
@@ -307,7 +308,21 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
     if (confirmed == true) {
-      // TODO: implement save deletion in shared_preferences.
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('saved_game');
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Saved game deleted')),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not delete saved game: $e')),
+          );
+        }
+      }
     }
   }
 

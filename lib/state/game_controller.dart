@@ -52,17 +52,46 @@ class GameController extends ChangeNotifier {
       };
 
   /// Load the card library from `assets/data/cards.json`.
+  ///
+  /// Replaces the old `assert(...)` checks (stripped in release builds)
+  /// with runtime validation. If the asset is missing or the JSON is
+  /// invalid, a [CardLibraryError] is thrown so callers can fall back
+  /// to a recovery screen instead of crash-looping.
   static Future<CardLibrary> _loadCardLibrary() async {
-    final jsonStr = await rootBundle.loadString('assets/data/cards.json');
-    final lib =
-        CardLibrary.fromJson(jsonDecode(jsonStr) as Map<String, dynamic>);
-    // Defensive: verify card counts.
-    assert(lib.events.length == 30,
-        'Expected 30 event cards, got ${lib.events.length}');
-    assert(lib.goodLuck.length == 20,
-        'Expected 20 good luck cards, got ${lib.goodLuck.length}');
-    assert(lib.badLuck.length == 20,
-        'Expected 20 bad luck cards, got ${lib.badLuck.length}');
+    String jsonStr;
+    try {
+      jsonStr = await rootBundle.loadString('assets/data/cards.json');
+    } catch (e) {
+      throw CardLibraryError('Could not load assets/data/cards.json: $e');
+    }
+    dynamic decoded;
+    try {
+      decoded = jsonDecode(jsonStr);
+    } catch (e) {
+      throw CardLibraryError('assets/data/cards.json is not valid JSON: $e');
+    }
+    if (decoded is! Map<String, dynamic>) {
+      throw CardLibraryError(
+          'assets/data/cards.json root is not a JSON object');
+    }
+    final CardLibrary lib;
+    try {
+      lib = CardLibrary.fromJson(decoded);
+    } catch (e) {
+      throw CardLibraryError('assets/data/cards.json shape is invalid: $e');
+    }
+    if (lib.events.length != 30) {
+      throw CardLibraryError(
+          'Expected 30 event cards, got ${lib.events.length}');
+    }
+    if (lib.goodLuck.length != 20) {
+      throw CardLibraryError(
+          'Expected 20 good luck cards, got ${lib.goodLuck.length}');
+    }
+    if (lib.badLuck.length != 20) {
+      throw CardLibraryError(
+          'Expected 20 bad luck cards, got ${lib.badLuck.length}');
+    }
     return lib;
   }
 
@@ -140,4 +169,14 @@ class PlayerSeed {
     required this.name,
     required this.isAI,
   });
+}
+
+/// Raised when `assets/data/cards.json` is missing, malformed, or has
+/// unexpected card counts. Caught in the UI to show a recovery screen
+/// rather than crash-looping on launch.
+class CardLibraryError implements Exception {
+  final String message;
+  const CardLibraryError(this.message);
+  @override
+  String toString() => 'CardLibraryError: $message';
 }
