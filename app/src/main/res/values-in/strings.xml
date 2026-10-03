@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Realita +62: Papan Kehidupan</string>
+    <string name="menu_new_game">Permainan Baru</string>
+    <string name="menu_resume">Sambung</string>
+    <string name="menu_tutorial">Cara Bermain</string>
+    <string name="menu_glossary">Glosarium</string>
+    <string name="menu_settings">Pengaturan</string>
+    <string name="main_menu_new_game">Permainan Baru</string>
+    <string name="main_menu_resume">Sambung Permainan</string>
+    <string name="main_menu_tutorial">Cara Bermain</string>
+    <string name="main_menu_glossary">Glosarium Istilah</string>
+    <string name="main_menu_settings">Pengaturan</string>
+    <string name="settings_language">Bahasa</string>
+    <string name="settings_dark_theme">Tema gelap</string>
+    <string name="settings_sound">Suara</string>
+    <string name="settings_haptics">Getaran</string>
+    <string name="settings_reduced_motion">Kurangi animasi</string>
+</resources>

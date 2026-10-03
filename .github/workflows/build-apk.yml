@@ -1,0 +1,99 @@
+name: Build & Release Signed APK
+
+# Triggers:
+#   1. On every push to main (CI build verification — does NOT publish a release)
+#   2. On every tag matching v*.*.* (builds the signed APK and creates a GitHub Release)
+on:
+  push:
+    branches: [main]
+    tags: ['v*.*.*']
+
+# Grant the workflow permission to create a GitHub release.
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Signed APK
+    runs-on: ubuntu-latest
+
+    env:
+      # The signing keystore is loaded from the REALITA_KEYSTORE_BASE64 repo secret
+      # (base64-encoded .jks file). If not present, the build falls back to debug
+      # signing so the APK is still installable.
+      REALITA_KEYSTORE_FILE: /tmp/realita.keystore
+      REALITA_KEYSTORE_PASSWORD: ${{ secrets.REALITA_KEYSTORE_PASSWORD }}
+      REALITA_KEY_ALIAS: ${{ secrets.REALITA_KEY_ALIAS }}
+      REALITA_KEY_PASSWORD: ${{ secrets.REALITA_KEY_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', 'gradle.properties', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Decode keystore (if secret present)
+        if: ${{ env.REALITA_KEYSTORE_PASSWORD != '' }}
+        run: |
+          echo "${{ secrets.REALITA_KEYSTORE_BASE64 }}" | base64 -d > $REALITA_KEYSTORE_FILE
+          ls -la $REALITA_KEYSTORE_FILE
+
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest --no-daemon --stacktrace
+
+      - name: Build signed release APK
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Verify the APK
+        run: |
+          APK=app/build/outputs/apk/release/app-release.apk
+          test -f $APK && echo "APK built successfully: $APK"
+          ls -la $APK
+
+      - name: Get version from tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Upload APK artifact
+        if: github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: realita62-life-board-debug-build
+          path: app/build/outputs/apk/release/app-release.apk
+          retention-days: 14
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: ${{ steps.version.outputs.VERSION }}
+          body_path: CHANGELOG.md
+          files: app/build/outputs/apk/release/app-release.apk
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

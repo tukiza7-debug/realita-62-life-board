@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="batik_red">#FFB31919</color>
+    <color name="batik_cream">#FFFFF8E7</color>
+    <color name="batik_teal">#FF0E5A4F</color>
+    <color name="batik_gold">#FFD4A23A</color>
+    <color name="batik_charcoal">#FF1F1F1F</color>
+</resources>
