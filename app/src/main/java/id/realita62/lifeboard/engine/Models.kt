@@ -82,9 +82,9 @@ data class Asset(
 
 @Serializable
 data class Player(
-    val id: Int,
-    val name: String,
-    val isAI: Boolean = false,
+    var id: Int,
+    var name: String,
+    var isAI: Boolean = false,
     var career: Career? = null,
     var education: EducationPath? = null,
     var maritalStatus: MaritalStatus = MaritalStatus.SINGLE,

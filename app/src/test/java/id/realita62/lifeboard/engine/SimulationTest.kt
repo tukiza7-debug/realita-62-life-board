@@ -64,10 +64,11 @@ class SimulationTest {
             val seed = i.toLong() * 7 + 31
             val players = (0 until 2).map { j ->
                 Player(id = j, name = "P$j", isAI = true).apply {
-                    education = if (j == 0) EducationPath.COLLEGE else EducationPath.SMA_SMK
+                    val path = if (j == 0) EducationPath.COLLEGE else EducationPath.SMA_SMK
+                    education = path
                     career = if (j == 0) Career.PNS else Career.OJOL_DRIVER
-                    cash = education.startingCash
-                    uktDebt = education.uktDebt
+                    cash = path.startingCash
+                    uktDebt = path.uktDebt
                 }
             }.toMutableList()
             val state = GameState(seed = seed, players = players)
