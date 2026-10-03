@@ -19,6 +19,7 @@ import id.realita62.lifeboard.RealitaApp
 import id.realita62.lifeboard.l10n.AppLocale
 import id.realita62.lifeboard.ui.components.Str
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainMenuScreen(app: RealitaApp, locale: AppLocale, nav: NavController) {
     Scaffold(topBar = {
@@ -44,11 +45,11 @@ fun MainMenuScreen(app: RealitaApp, locale: AppLocale, nav: NavController) {
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(Modifier.height(24.dp))
-            MenuButton(app, locale, Icons.Default.PlayArrow, "main_menu_new_game", "menu_new_game") { nav.navigate("new_game") }
-            MenuButton(app, locale, Icons.Default.History, "main_menu_resume", "menu_resume") { nav.navigate("game") }
-            MenuButton(app, locale, Icons.Default.School, "main_menu_tutorial", "menu_tutorial") { nav.navigate("tutorial") }
-            MenuButton(app, locale, Icons.Default.Help, "main_menu_glossary", "menu_glossary") { nav.navigate("glossary") }
-            MenuButton(app, locale, Icons.Default.Settings, "main_menu_settings", "menu_settings") { nav.navigate("settings") }
+            MenuButton(app, locale, Icons.Default.PlayArrow, "New Game", "Permainan Baru") { nav.navigate("new_game") }
+            MenuButton(app, locale, Icons.Default.History, "Resume", "Sambung") { nav.navigate("game") }
+            MenuButton(app, locale, Icons.Default.School, "How to Play", "Cara Bermain") { nav.navigate("tutorial") }
+            MenuButton(app, locale, Icons.Default.Help, "Glossary", "Glosarium") { nav.navigate("glossary") }
+            MenuButton(app, locale, Icons.Default.Settings, "Settings", "Pengaturan") { nav.navigate("settings") }
         }
     }
 }

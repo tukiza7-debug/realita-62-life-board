@@ -2,6 +2,7 @@ package id.realita62.lifeboard.engine
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import id.realita62.lifeboard.data.CardDef
 import id.realita62.lifeboard.data.CardLibrary
 
 /**

@@ -59,10 +59,10 @@ fun SettingsScreen(app: RealitaApp, locale: AppLocale, nav: NavController) {
             }
             Spacer(Modifier.height(16.dp))
 
-            SwitchRow(app, locale, "Dark theme", "Tema gelap", darkTheme) { app.settings.setDarkTheme(it) }
-            SwitchRow(app, locale, "Sound", "Suara", soundOn) { app.settings.setSoundOn(it) }
-            SwitchRow(app, locale, "Haptics", "Getar", hapticsOn) { app.settings.setHapticsOn(it) }
-            SwitchRow(app, locale, "Reduced motion", "Kurangi animasi", reducedMotion) { app.settings.setReducedMotion(it) }
+            SwitchRow(app, locale, "Dark theme", "Tema gelap", darkTheme) { scope.launch { app.settings.setDarkTheme(it) } }
+            SwitchRow(app, locale, "Sound", "Suara", soundOn) { scope.launch { app.settings.setSoundOn(it) } }
+            SwitchRow(app, locale, "Haptics", "Getar", hapticsOn) { scope.launch { app.settings.setHapticsOn(it) } }
+            SwitchRow(app, locale, "Reduced motion", "Kurangi animasi", reducedMotion) { scope.launch { app.settings.setReducedMotion(it) } }
         }
     }
 }

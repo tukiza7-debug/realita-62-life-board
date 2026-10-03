@@ -89,6 +89,7 @@ class SeededRng(seed: Long) {
     }
 }
 
+@Serializable
 data class DiceRoll(val die1: Int, val die2: Int, val total: Int) {
     val isDouble get() = die1 == die2
 }

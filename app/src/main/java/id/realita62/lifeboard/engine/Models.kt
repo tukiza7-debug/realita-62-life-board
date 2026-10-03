@@ -69,10 +69,10 @@ data class Asset(
     val id: String,
     val name: String,
     val price: Rp,
-    val remainingKpr: Rp = 0.0,
-    val kprInterestBase: Float = 0.03f,     // per lap
-    val kprInterestBoostLaps: Int = 0,     // laps remaining of +1% boost (event E17)
-    val propertyTaxPaid: Boolean = false
+    var remainingKpr: Rp = 0.0,
+    var kprInterestBase: Float = 0.03f,        // per lap
+    var kprInterestBoostLapsLeft: Int = 0,    // laps remaining of +1% boost (event E17)
+    var propertyTaxPaid: Boolean = false
 ) {
     val downPayment: Rp get() = price * 0.20
     val kprPrincipal: Rp get() = price * 0.80
