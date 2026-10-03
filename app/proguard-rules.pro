@@ -5,7 +5,7 @@
 -keepclassmembers class kotlinx.serialization.json.** {
     *** Companion;
 }
--keepclasses class kotlinx.serialization.json.** {
+-keep class kotlinx.serialization.json.** {
     *** Companion;
 }
 -keep,includedescriptorclasses class **$$serializer { * }
