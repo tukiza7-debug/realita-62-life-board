@@ -22,17 +22,19 @@ Permainan papan bergaya Game of Life yang memadukan mekanik klasik dengan realit
 
 Ambil APK terbaru dari [halaman Rilis](https://github.com/tukiza7-debug/realita-62-life-board/releases/latest).
 
-- Untuk ponsel modern: `app-arm64-v8a-release.apk`.
-- Jika ragu atau memasang di emulator x86: `app-release.apk` (APK universal).
+- Untuk ponsel modern: `Realita62-LifeBoard-v<VERSION>-arm64-v8a.apk`.
+- Jika ragu atau memasang di emulator x86: `Realita62-LifeBoard-v<VERSION>-universal.apk`.
 - Memerlukan Android 7.0 (API 24) atau lebih baru.
 
 Izinkan pemasangan dari browser/aplikasi berkas Anda jika Android memblokirnya. Jika muncul "Aplikasi tidak terpasang", penyebab paling mungkin adalah ketidakcocokan tanda tangan — copot pemasangan build sebelumnya terlebih dahulu.
 
-Verifikasi unduhan dengan `SHA256SUMS.txt`:
+Verifikasi unduhan dengan `Realita62-LifeBoard-v<VERSION>-SHA256SUMS.txt`:
 
 ```bash
-sha256sum -c SHA256SUMS.txt   # di direktori yang berisi file .apk
+sha256sum -c Realita62-LifeBoard-v<VERSION>-SHA256SUMS.txt   # di direktori yang berisi file .apk
 ```
+
+**Catatan saat memasang di atas build lama:** `applicationId` sama-sama `id.realita62.lifeboard` untuk aplikasi Kotlin lama dan aplikasi Flutter. Bila sebelumnya Anda memasang build yang ditandatangani dengan keystore berbeda (mis. APK debug-signed lama vs APK release-signed baru), Android akan menolak pemasangan dengan `INSTALL_FAILED_UPDATE_INCOMPATIBLE`. Copot build lama terlebih dahulu.
 
 ## Cara bermain (ringkas)
 

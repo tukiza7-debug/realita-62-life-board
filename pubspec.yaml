@@ -4,7 +4,7 @@ publish_to: 'none'
 
 # Single source of truth for version. CI overrides this with tag-derived version.
 # See .github/workflows/build-flutter-apk.yml.
-version: 2.0.0+200
+version: 2.0.1+201
 
 environment:
   sdk: ^3.5.0

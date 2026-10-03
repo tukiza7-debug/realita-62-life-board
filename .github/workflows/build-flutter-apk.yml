@@ -40,6 +40,27 @@ jobs:
       - name: flutter pub get
         run: flutter pub get
 
+      - name: Verify MainActivity package matches namespace
+        run: |
+          set -e
+          NAMESPACE=$(grep -E '^\s*namespace\s*=' android/app/build.gradle | head -1 | sed -E 's/.*=\s*"([^"]+)".*/\1/')
+          echo "namespace=$NAMESPACE"
+          EXPECTED_PATH=$(echo "$NAMESPACE" | tr '.' '/')
+          EXPECTED_FILE="android/app/src/main/kotlin/$EXPECTED_PATH/MainActivity.kt"
+          echo "expected: $EXPECTED_FILE"
+          if [ ! -f "$EXPECTED_FILE" ]; then
+            echo "FAIL: $EXPECTED_FILE not found"
+            ls android/app/src/main/kotlin -R || true
+            exit 1
+          fi
+          DECLARED=$(grep -E '^package ' "$EXPECTED_FILE" | head -1 | awk '{print $2}')
+          echo "declared package=$DECLARED"
+          if [ "$DECLARED" != "$NAMESPACE" ]; then
+            echo "FAIL: package $DECLARED != namespace $NAMESPACE"
+            exit 1
+          fi
+          echo "OK: MainActivity package matches namespace"
+
       - name: flutter analyze
         run: flutter analyze
 
@@ -54,13 +75,77 @@ jobs:
         uses: lycheeverse/lychee-action@v2
         with:
           args: --no-progress --exclude-path legacy-kotlin -- 'README.md' 'README.id.md' 'docs/**/*.md'
-        continue-on-error: true  # lychee can fail to reach some Indonesian gov sites from GitHub runners
+        continue-on-error: true  # Indonesian gov sites (KBBI etc.) often unreachable from GH runners
 
-  build-apk:
-    name: Build APK
+  android-emulator-smoke:
+    name: Android emulator smoke test
     runs-on: ubuntu-latest
     needs: analyze-and-test
-    if: startsWith(github.ref, 'refs/tags/v') && needs.analyze-and-test.result == 'success'
+    if: needs.analyze-and-test.result == 'success'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Flutter 3.24.0
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.24.0'
+          cache: true
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-34-api-34-x86_64
+
+      - name: Create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: default
+          arch: x86_64
+          force-install: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+          script: echo "Generated AVD snapshot for caching"
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+
+      - name: Run integration test on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: default
+          arch: x86_64
+          force-install: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot-save
+          script: |
+            # Verify the launchable activity name via aapt.
+            APK=$(find build/app/outputs -name "app-debug.apk" | head -1)
+            echo "Built APK: $APK"
+            $ANDROID_HOME/build-tools/34.0.0/aapt dump badging "$APK" | grep -E "package|launchable-activity"
+            # Run the launch smoke test.
+            flutter test integration_test/launch_smoke_test.dart
+
+  build-apk:
+    name: Build & Release APK
+    runs-on: ubuntu-latest
+    needs: [analyze-and-test, android-emulator-smoke]
+    if: startsWith(github.ref, 'refs/tags/v') && needs.analyze-and-test.result == 'success' && needs.android-emulator-smoke.result == 'success'
     env:
       REALITA_KEYSTORE_FILE: /tmp/realita.keystore
       REALITA_KEYSTORE_PASSWORD: ${{ secrets.REALITA_KEYSTORE_PASSWORD }}
@@ -99,28 +184,79 @@ jobs:
       - name: flutter build apk --release (universal)
         run: flutter build apk --release
 
-      - name: Generate SHA256SUMS.txt
+      - name: Verify APK launchable activity
         run: |
-          cd build/app/outputs/flutter-apk
-          sha256sum app-release.apk app-armeabi-v7a-release.apk app-arm64-v8a-release.apk app-x86_64-release.apk > SHA256SUMS.txt
-          cat SHA256SUMS.txt
+          set -e
+          APK=$(find build/app/outputs/flutter-apk -name "app-release.apk" | head -1)
+          echo "Built APK: $APK"
+          $ANDROID_HOME/build-tools/34.0.0/aapt dump badging "$APK" > /tmp/badging.txt
+          cat /tmp/badging.txt
+          ACTIVITY=$(grep "launchable-activity" /tmp/badging.txt | sed -E "s/.*name='([^']+)'.*/\1/")
+          echo "launchable activity: $ACTIVITY"
+          if [ "$ACTIVITY" != "id.realita62.lifeboard.MainActivity" ]; then
+            echo "FAIL: expected launchable activity id.realita62.lifeboard.MainActivity but got $ACTIVITY"
+            exit 1
+          fi
+          PKG=$(grep "package:" /tmp/badging.txt | sed -E "s/.*package: name='([^']+)'.*/\1/")
+          echo "package: $PKG"
+          if [ "$PKG" != "id.realita62.lifeboard" ]; then
+            echo "FAIL: expected package id.realita62.lifeboard but got $PKG"
+            exit 1
+          fi
+          echo "OK: launchable activity and package match"
 
-      - name: Get version from tag
+      - name: Get version from tag (strip leading 'v')
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG#v}"
+          echo "TAG=$TAG" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Rename release assets to Realita62-LifeBoard-v<VERSION>-*
+        run: |
+          set -e
+          cd build/app/outputs/flutter-apk
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          mv app-release.apk         "Realita62-LifeBoard-v${VERSION}-universal.apk"
+          mv app-arm64-v8a-release.apk   "Realita62-LifeBoard-v${VERSION}-arm64-v8a.apk"
+          mv app-armeabi-v7a-release.apk "Realita62-LifeBoard-v${VERSION}-armeabi-v7a.apk"
+          mv app-x86_64-release.apk      "Realita62-LifeBoard-v${VERSION}-x86_64.apk"
+          ls -la
+
+      - name: Generate SHA256SUMS AFTER renaming
+        run: |
+          set -e
+          cd build/app/outputs/flutter-apk
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          sha256sum \
+            "Realita62-LifeBoard-v${VERSION}-universal.apk" \
+            "Realita62-LifeBoard-v${VERSION}-arm64-v8a.apk" \
+            "Realita62-LifeBoard-v${VERSION}-armeabi-v7a.apk" \
+            "Realita62-LifeBoard-v${VERSION}-x86_64.apk" \
+            > "Realita62-LifeBoard-v${VERSION}-SHA256SUMS.txt"
+          cat "Realita62-LifeBoard-v${VERSION}-SHA256SUMS.txt"
+
+      - name: Fail if any old-named (app-*release*.apk) file remains
+        run: |
+          set -e
+          cd build/app/outputs/flutter-apk
+          OLD=$(find . -maxdepth 1 -name 'app-*release*.apk' | head -1 || true)
+          if [ -n "$OLD" ]; then
+            echo "FAIL: found old-named release asset: $OLD"
+            ls -la
+            exit 1
+          fi
+          echo "OK: no old-named release assets"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.version.outputs.VERSION }}
-          name: ${{ steps.version.outputs.VERSION }}
+          tag_name: ${{ steps.version.outputs.TAG }}
+          name: ${{ steps.version.outputs.TAG }}
           body_path: CHANGELOG.md
           files: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
-            build/app/outputs/flutter-apk/app-x86_64-release.apk
-            build/app/outputs/flutter-apk/SHA256SUMS.txt
+            build/app/outputs/flutter-apk/Realita62-LifeBoard-v*
           generate_release_notes: true
           draft: false
           prerelease: false

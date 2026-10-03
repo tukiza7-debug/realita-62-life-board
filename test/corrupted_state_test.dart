@@ -35,14 +35,16 @@ void main() {
     });
 
     test('falls back to default for unknown enum value', () async {
-      SharedPreferences.setMockInitialValues({'motion_level': 'non_existent_value'});
+      SharedPreferences.setMockInitialValues(
+          {'motion_level': 'non_existent_value'});
       final prefs = await SharedPreferences.getInstance();
       final repo = SettingsRepository(prefs);
       final s = repo.load();
       expect(s.motionLevel, MotionLevel.full);
     });
 
-    test('falls back to default when a String is stored under a bool key', () async {
+    test('falls back to default when a String is stored under a bool key',
+        () async {
       // SharedPreferences only stores typed values via setBool/setString etc.
       // setString under a bool key persists as a String; our getter must
       // detect the type mismatch and fall back, not crash.
@@ -53,7 +55,8 @@ void main() {
       expect(s.muteAll, false);
     });
 
-    test('falls back to default when a String is stored under a double key', () async {
+    test('falls back to default when a String is stored under a double key',
+        () async {
       SharedPreferences.setMockInitialValues({'master_volume': 'not_a_double'});
       final prefs = await SharedPreferences.getInstance();
       final repo = SettingsRepository(prefs);
@@ -85,7 +88,8 @@ void main() {
   });
 
   group('GameOrchestrator.deserialize corrupted saved_game', () {
-    final lib = CardLibrary(events: const [], goodLuck: const [], badLuck: const []);
+    final lib =
+        CardLibrary(events: const [], goodLuck: const [], badLuck: const []);
 
     test('throws FormatException for invalid JSON', () {
       expect(
@@ -98,8 +102,8 @@ void main() {
     test('throws on missing seed', () {
       const bad = '{"players": []}';
       expect(
-        () => GameOrchestrator.deserialize(
-            bad, lib, BalanceConfig.defaultConfig),
+        () =>
+            GameOrchestrator.deserialize(bad, lib, BalanceConfig.defaultConfig),
         throwsA(anything),
       );
     });
@@ -118,7 +122,8 @@ void main() {
     });
 
     test('findById returns null for unknown id', () {
-      final lib = CardLibrary(events: const [], goodLuck: const [], badLuck: const []);
+      final lib =
+          CardLibrary(events: const [], goodLuck: const [], badLuck: const []);
       expect(lib.findById('E99'), isNull);
     });
   });

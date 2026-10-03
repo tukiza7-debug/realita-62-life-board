@@ -22,17 +22,19 @@ A Game-of-Life-style family board game that blends classic mechanics with the bi
 
 Grab the latest APK from the [Releases page](https://github.com/tukiza7-debug/realita-62-life-board/releases/latest).
 
-- For most modern phones: `app-arm64-v8a-release.apk`.
-- If unsure or installing on an x86 emulator: `app-release.apk` (universal APK).
+- For most modern phones: `Realita62-LifeBoard-v<VERSION>-arm64-v8a.apk`.
+- If unsure or installing on an x86 emulator: `Realita62-LifeBoard-v<VERSION>-universal.apk`.
 - Android 7.0 (API 24) or newer required.
 
 Allow installation from your browser/files app if Android blocks it. If you get "App not installed", the most likely cause is signature mismatch — uninstall any previous build first.
 
-Verify the download with `SHA256SUMS.txt`:
+Verify the download with `Realita62-LifeBoard-v<VERSION>-SHA256SUMS.txt`:
 
 ```bash
-sha256sum -c SHA256SUMS.txt   # in the directory containing the .apk files
+sha256sum -c Realita62-LifeBoard-v<VERSION>-SHA256SUMS.txt   # in the directory containing the .apk files
 ```
+
+**Note on installing over an older build:** the `applicationId` is `id.realita62.lifeboard` for both the legacy Kotlin app and the Flutter app. If you previously installed a build signed with a different keystore (e.g. an old debug-signed APK vs a new release-signed one), Android will refuse the install with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`. Uninstall the old build first.
 
 ## How to play (short version)
 
