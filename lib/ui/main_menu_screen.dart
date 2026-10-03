@@ -110,8 +110,13 @@ class _ContinueCard extends StatelessWidget {
     return FutureBuilder<SharedPreferences>(
       future: SharedPreferences.getInstance(),
       builder: (context, snap) {
-        if (!snap.hasData) return const SizedBox.shrink();
-        final hasSave = snap.data!.containsKey('saved_game');
+        if (snap.hasError || !snap.hasData) return const SizedBox.shrink();
+        bool hasSave;
+        try {
+          hasSave = snap.data!.containsKey('saved_game');
+        } catch (_) {
+          return const SizedBox.shrink();
+        }
         if (!hasSave) return const SizedBox.shrink();
         return Card(
           child: ListTile(

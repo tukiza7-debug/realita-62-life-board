@@ -143,80 +143,122 @@ class SettingsRepository {
   static const _largerTouch = 'larger_touch';
   static const _schemaVersion = 'schema_version';
 
-  final SharedPreferences _prefs;
+  final SharedPreferences? _prefs;
   SettingsRepository(this._prefs);
 
+  String? _getString(String key) {
+    final p = _prefs;
+    if (p == null) return null;
+    try {
+      final v = p.get(key);
+      return v is String ? v : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  bool? _getBool(String key) {
+    final p = _prefs;
+    if (p == null) return null;
+    try {
+      final v = p.get(key);
+      return v is bool ? v : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  double? _getDouble(String key) {
+    final p = _prefs;
+    if (p == null) return null;
+    try {
+      final v = p.get(key);
+      return v is double ? v : (v is int ? v.toDouble() : null);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  int? _getInt(String key) {
+    final p = _prefs;
+    if (p == null) return null;
+    try {
+      final v = p.get(key);
+      return v is int ? v : (v is double ? v.toInt() : null);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  T _enum<T extends Enum>(String key, List<T> values, T def) {
+    final name = _getString(key);
+    if (name == null) return def;
+    for (final v in values) {
+      if (v.name == name) return v;
+    }
+    return def;
+  }
+
   AppSettings load() {
-    final savedVersion = _prefs.getInt(_schemaVersion) ?? 1;
-    // Future migrations go here: if (savedVersion < 2) migrateV1toV2();
+    final savedVersion = _getInt(_schemaVersion) ?? 1;
     return AppSettings(
-      locale: _prefs.getString(_locale) == null
-          ? AppLocale.system
-          : AppLocale.values.firstWhere(
-              (e) => e.name == _prefs.getString(_locale),
-              orElse: () => AppLocale.system),
-      themeMode: AppThemeMode.values.firstWhere(
-          (e) => e.name == (_prefs.getString(_themeMode) ?? 'system'),
-          orElse: () => AppThemeMode.system),
-      highContrast: _prefs.getBool(_highContrast) ?? false,
-      colorblindSafeTiles: _prefs.getBool(_colorblindSafe) ?? true,
-      orientation: OrientationMode.values.firstWhere(
-          (e) => e.name == (_prefs.getString(_orientation) ?? 'auto'),
-          orElse: () => OrientationMode.auto),
-      keepScreenOn: _prefs.getBool(_keepScreenOn) ?? true,
-      masterVolume: _prefs.getDouble(_masterVolume) ?? 0.8,
-      musicVolume: _prefs.getDouble(_musicVolume) ?? 0.6,
-      sfxVolume: _prefs.getDouble(_sfxVolume) ?? 0.8,
-      muteAll: _prefs.getBool(_muteAll) ?? false,
-      hapticsEnabled: _prefs.getBool(_hapticsEnabled) ?? true,
-      hapticIntensity: HapticIntensity.values.firstWhere(
-          (e) => e.name == (_prefs.getString(_hapticIntensity) ?? 'normal'),
-          orElse: () => HapticIntensity.normal),
-      motionLevel: MotionLevel.values.firstWhere(
-          (e) => e.name == (_prefs.getString(_motionLevel) ?? 'full'),
-          orElse: () => MotionLevel.full),
-      gameSpeed: GameSpeed.values.firstWhere(
-          (e) => e.name == (_prefs.getString(_gameSpeed) ?? 'normal'),
-          orElse: () => GameSpeed.normal),
-      aiSpeed: GameSpeed.values.firstWhere(
-          (e) => e.name == (_prefs.getString(_aiSpeed) ?? 'normal'),
-          orElse: () => GameSpeed.normal),
-      skipOwnTurns: _prefs.getBool(_skipOwnTurns) ?? false,
-      confirmPurchases: _prefs.getBool(_confirmPurchases) ?? true,
-      showTileHints: _prefs.getBool(_showTileHints) ?? true,
-      showScoreEstimate: _prefs.getBool(_showScoreEstimate) ?? true,
-      screenReaderAnnouncements: _prefs.getBool(_screenReader) ?? true,
-      largerTouchTargets: _prefs.getBool(_largerTouch) ?? false,
+      locale: _enum(_locale, AppLocale.values, AppLocale.system),
+      themeMode: _enum(_themeMode, AppThemeMode.values, AppThemeMode.system),
+      highContrast: _getBool(_highContrast) ?? false,
+      colorblindSafeTiles: _getBool(_colorblindSafe) ?? true,
+      orientation:
+          _enum(_orientation, OrientationMode.values, OrientationMode.auto),
+      keepScreenOn: _getBool(_keepScreenOn) ?? true,
+      masterVolume: _getDouble(_masterVolume) ?? 0.8,
+      musicVolume: _getDouble(_musicVolume) ?? 0.6,
+      sfxVolume: _getDouble(_sfxVolume) ?? 0.8,
+      muteAll: _getBool(_muteAll) ?? false,
+      hapticsEnabled: _getBool(_hapticsEnabled) ?? true,
+      hapticIntensity: _enum(
+          _hapticIntensity, HapticIntensity.values, HapticIntensity.normal),
+      motionLevel: _enum(_motionLevel, MotionLevel.values, MotionLevel.full),
+      gameSpeed: _enum(_gameSpeed, GameSpeed.values, GameSpeed.normal),
+      aiSpeed: _enum(_aiSpeed, GameSpeed.values, GameSpeed.normal),
+      skipOwnTurns: _getBool(_skipOwnTurns) ?? false,
+      confirmPurchases: _getBool(_confirmPurchases) ?? true,
+      showTileHints: _getBool(_showTileHints) ?? true,
+      showScoreEstimate: _getBool(_showScoreEstimate) ?? true,
+      screenReaderAnnouncements: _getBool(_screenReader) ?? true,
+      largerTouchTargets: _getBool(_largerTouch) ?? false,
       schemaVersion: savedVersion,
     );
   }
 
   Future<void> save(AppSettings s) async {
-    await _prefs.setString(_locale, s.locale.name);
-    await _prefs.setString(_themeMode, s.themeMode.name);
-    await _prefs.setBool(_highContrast, s.highContrast);
-    await _prefs.setBool(_colorblindSafe, s.colorblindSafeTiles);
-    await _prefs.setString(_orientation, s.orientation.name);
-    await _prefs.setBool(_keepScreenOn, s.keepScreenOn);
-    await _prefs.setDouble(_masterVolume, s.masterVolume);
-    await _prefs.setDouble(_musicVolume, s.musicVolume);
-    await _prefs.setDouble(_sfxVolume, s.sfxVolume);
-    await _prefs.setBool(_muteAll, s.muteAll);
-    await _prefs.setBool(_hapticsEnabled, s.hapticsEnabled);
-    await _prefs.setString(_hapticIntensity, s.hapticIntensity.name);
-    await _prefs.setString(_motionLevel, s.motionLevel.name);
-    await _prefs.setString(_gameSpeed, s.gameSpeed.name);
-    await _prefs.setString(_aiSpeed, s.aiSpeed.name);
-    await _prefs.setBool(_skipOwnTurns, s.skipOwnTurns);
-    await _prefs.setBool(_confirmPurchases, s.confirmPurchases);
-    await _prefs.setBool(_showTileHints, s.showTileHints);
-    await _prefs.setBool(_showScoreEstimate, s.showScoreEstimate);
-    await _prefs.setBool(_screenReader, s.screenReaderAnnouncements);
-    await _prefs.setBool(_largerTouch, s.largerTouchTargets);
-    await _prefs.setInt(_schemaVersion, _kSchemaVersion);
+    final p = _prefs;
+    if (p == null) return;
+    await p.setString(_locale, s.locale.name);
+    await p.setString(_themeMode, s.themeMode.name);
+    await p.setBool(_highContrast, s.highContrast);
+    await p.setBool(_colorblindSafe, s.colorblindSafeTiles);
+    await p.setString(_orientation, s.orientation.name);
+    await p.setBool(_keepScreenOn, s.keepScreenOn);
+    await p.setDouble(_masterVolume, s.masterVolume);
+    await p.setDouble(_musicVolume, s.musicVolume);
+    await p.setDouble(_sfxVolume, s.sfxVolume);
+    await p.setBool(_muteAll, s.muteAll);
+    await p.setBool(_hapticsEnabled, s.hapticsEnabled);
+    await p.setString(_hapticIntensity, s.hapticIntensity.name);
+    await p.setString(_motionLevel, s.motionLevel.name);
+    await p.setString(_gameSpeed, s.gameSpeed.name);
+    await p.setString(_aiSpeed, s.aiSpeed.name);
+    await p.setBool(_skipOwnTurns, s.skipOwnTurns);
+    await p.setBool(_confirmPurchases, s.confirmPurchases);
+    await p.setBool(_showTileHints, s.showTileHints);
+    await p.setBool(_showScoreEstimate, s.showScoreEstimate);
+    await p.setBool(_screenReader, s.screenReaderAnnouncements);
+    await p.setBool(_largerTouch, s.largerTouchTargets);
+    await p.setInt(_schemaVersion, _kSchemaVersion);
   }
 
   Future<void> resetToDefaults() async {
-    await _prefs.clear();
+    final p = _prefs;
+    if (p == null) return;
+    await p.clear();
   }
 }
