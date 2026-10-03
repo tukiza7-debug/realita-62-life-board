@@ -13,7 +13,7 @@ if [ ! -f "$APK" ]; then
 fi
 
 echo "Waiting for emulator to be fully ready (sys.boot_completed=1)..."
-for i in $(seq 1 60); do
+for i in $(seq 1 90); do
   BOOT=$(adb -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r\n')
   if [ "$BOOT" = "1" ]; then
     echo "Boot completed after ${i}s"
@@ -21,8 +21,19 @@ for i in $(seq 1 60); do
   fi
   sleep 1
 done
-# Give the package manager a moment to settle after boot.
-sleep 10
+# Settle a bit longer.
+sleep 15
+
+# Skip the setup wizard so FallbackHome is not the foreground activity.
+# Without this, the smoke test sees FallbackHome (SetupWizard) as the
+# focused window instead of our app.
+echo "Skipping setup wizard..."
+adb -s emulator-5554 shell settings put global device_provisioned 1
+adb -s emulator-5554 shell settings put secure user_setup_complete 1
+# Stop the setup wizard if it is running.
+adb -s emulator-5554 shell am force-stop com.google.android.setupwizard 2>/dev/null || true
+adb -s emulator-5554 shell am force-stop com.android.settings 2>/dev/null || true
+sleep 2
 
 echo "Installing APK (with retries)..."
 INSTALLED=0
@@ -45,20 +56,38 @@ adb -s emulator-5554 logcat -c
 
 echo "Launching MainActivity..."
 adb -s emulator-5554 shell am start -n id.realita62.lifeboard/.MainActivity
+sleep 5
 
-echo "Waiting for app to settle (30s)..."
-sleep 30
+# Some launches are slow on the software-GPU runner; retry the focus check
+# up to 6 times with 10s gaps (total 60s after launch).
+echo "Checking focused window (retries up to 6x with 10s gaps)..."
+FOCUS=""
+for i in $(seq 1 6); do
+  FOCUS=$(adb -s emulator-5554 shell dumpsys window 2>/dev/null | grep -E "mCurrentFocus|mFocusedApp" | head -2)
+  if echo "$FOCUS" | grep -q "id.realita62.lifeboard"; then
+    echo "OK on attempt ${i}: focused window is ours"
+    break
+  fi
+  echo "Attempt ${i}: focused window is not ours yet:"
+  echo "$FOCUS"
+  sleep 10
+done
 
-echo "=== Focused window (must contain id.realita62.lifeboard) ==="
-FOCUS=$(adb -s emulator-5554 shell dumpsys window | grep -E "mCurrentFocus|mFocusedApp" | head -2)
+echo "=== Final focused window ==="
 echo "$FOCUS"
 if ! echo "$FOCUS" | grep -q "id.realita62.lifeboard"; then
   echo "FAIL: app is not the focused window — main menu not visible"
+  echo "=== AndroidRuntime errors ==="
+  adb -s emulator-5554 logcat -d -s AndroidRuntime:E 2>/dev/null || true
+  echo "=== FATAL EXCEPTION / ClassNotFoundException ==="
+  adb -s emulator-5554 logcat -d 2>/dev/null | grep -E "FATAL EXCEPTION|ClassNotFoundException" || echo "(none)"
+  echo "=== Last 30 lines of full logcat ==="
+  adb -s emulator-5554 logcat -d 2>/dev/null | tail -30
   exit 1
 fi
 
 echo "=== AndroidRuntime errors (must be empty) ==="
-adb -s emulator-5554 logcat -d -s AndroidRuntime:E > /tmp/are.txt || true
+adb -s emulator-5554 logcat -d -s AndroidRuntime:E > /tmp/are.txt 2>/dev/null || true
 if [ -s /tmp/are.txt ]; then
   echo "FAIL: AndroidRuntime errors in logcat"
   cat /tmp/are.txt
