@@ -171,11 +171,13 @@ class GameOrchestrator(
     fun applyAssetPurchase(assetId: String): List<GameEvent> {
         val idx = pendingAssetShop ?: return emptyList()
         val result = engine.purchaseAsset(state, idx, assetId)
+        // Always clear pendingAssetShop — even on failure — so the orchestrator
+        // does not get stuck re-trying a failed purchase in a tight loop.
+        pendingAssetShop = null
         return when (result) {
             is PurchaseResult.Ok -> {
                 val ev = listOf(GameEvent.AssetPurchased(idx, result.asset.id, result.asset.name))
                 state.log.addAll(ev)
-                pendingAssetShop = null
                 ev
             }
             is PurchaseResult.Failed -> listOf(GameEvent.Empty)

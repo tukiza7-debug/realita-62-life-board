@@ -49,8 +49,8 @@ class GameEngineTest {
         val p = newPlayer(Career.PNS)
         val state = newSinglePlayerState(p)
         engine.payday(state, 0)
-        // Gross 9, TAPERA 3% = 0.27, take-home = 8.73
-        assertEquals(8.73, p.cash, 0.001)
+        // Cash starts at 5.0 (default); gross 9 - TAPERA 3% (0.27) = 8.73 take-home.
+        assertEquals(5.0 + 8.73, p.cash, 0.001)
     }
 
     @Test
@@ -59,8 +59,8 @@ class GameEngineTest {
         val p = newPlayer(Career.SCBD_EMPLOYEE)
         val state = newSinglePlayerState(p)
         engine.payday(state, 0)
-        // Gross 12, TAPERA 3% = 0.36, take-home = 11.64
-        assertEquals(11.64, p.cash, 0.001)
+        // Cash starts at 5.0; gross 12 - TAPERA 3% (0.36) = 11.64 take-home.
+        assertEquals(5.0 + 11.64, p.cash, 0.001)
     }
 
     @Test
@@ -123,7 +123,8 @@ class GameEngineTest {
         val ok = result as PurchaseResult.Ok
         assertEquals(7.84, ok.downPayment, 0.001)
         assertEquals(31.36, ok.kprPrincipal, 0.001)
-        assertEquals(35.0 - 7.84, p.cash, 0.001)
+        // Cash started at 20.0; down payment was 7.84 → 20 - 7.84 = 12.16.
+        assertEquals(20.0 - 7.84, p.cash, 0.001)
         assertEquals(31.36, p.assets[0].remainingKpr, 0.001)
     }
 
@@ -325,15 +326,19 @@ class GameEngineTest {
             id = "BL06", titleEn = "", titleId = "", flavorEn = "", flavorId = "",
             effect = "BL_HOSPITAL_BILL", isLuck = true
         )
-        val insured = newPlayer(Career.PNS, cash = 20.0).apply { insurance = true }
+        // Use cash below the savings-buffer threshold (Rp 10M) so only the
+        // insurance halving applies, isolating the rule under test.
+        val insured = newPlayer(Career.PNS, cash = 5.0).apply { insurance = true }
         val state = newSinglePlayerState(insured)
         resolver.resolveImmediate(state, 0, card)
-        assertEquals(20.0 - 4.0, insured.cash, 0.001) // 8 / 2 = 4
+        // 8 / 2 = 4 (insurance halving only).
+        assertEquals(5.0 - 4.0, insured.cash, 0.001)
 
-        val uninsured = newPlayer(Career.PNS, cash = 20.0).apply { insurance = false }
+        val uninsured = newPlayer(Career.PNS, cash = 5.0).apply { insurance = false }
         val state2 = newSinglePlayerState(uninsured)
         resolver.resolveImmediate(state2, 0, card)
-        assertEquals(20.0 - 8.0, uninsured.cash, 0.001)
+        // Full 8 hit, no savings buffer below threshold.
+        assertEquals(5.0 - 8.0, uninsured.cash, 0.001)
     }
 
     @Test
