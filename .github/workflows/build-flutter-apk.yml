@@ -102,26 +102,6 @@ jobs:
       - name: flutter pub get
         run: flutter pub get
 
-      - name: AVD cache
-        uses: actions/cache@v4
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-34-api-34-x86_64
-
-      - name: Create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          target: default
-          arch: x86_64
-          force-install: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
-          script: echo "Generated AVD snapshot for caching"
-
       - name: Build debug APK
         run: flutter build apk --debug
 
@@ -131,14 +111,17 @@ jobs:
           api-level: 34
           target: default
           arch: x86_64
-          force-install: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot-save
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+          disable-animations: true
+          emulator-boot-timeout: 600
           script: |
-            # Verify the launchable activity name via aapt.
-            APK=$(find build/app/outputs -name "app-debug.apk" | head -1)
+            set -e
+            echo "WORKSPACE=$GITHUB_WORKSPACE"
+            APK="$GITHUB_WORKSPACE/build/app/outputs/flutter-apk/app-debug.apk"
             echo "Built APK: $APK"
+            test -f "$APK" || { echo "FAIL: APK not found"; exit 1; }
             $ANDROID_HOME/build-tools/34.0.0/aapt dump badging "$APK" | grep -E "package|launchable-activity"
-            # Run the launch smoke test.
+            cd "$GITHUB_WORKSPACE"
             flutter test integration_test/launch_smoke_test.dart
 
   build-apk:
