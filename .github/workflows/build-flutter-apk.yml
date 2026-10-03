@@ -105,7 +105,23 @@ jobs:
       - name: Build debug APK
         run: flutter build apk --debug
 
-      - name: Run integration test on emulator
+      - name: Verify launchable activity via aapt dump badging
+        run: |
+          set -e
+          APK="$GITHUB_WORKSPACE/build/app/outputs/flutter-apk/app-debug.apk"
+          echo "Built APK: $APK"
+          test -f "$APK" || { echo "FAIL: APK not found"; exit 1; }
+          $ANDROID_HOME/build-tools/34.0.0/aapt dump badging "$APK" > /tmp/badging.txt
+          cat /tmp/badging.txt
+          ACTIVITY=$(grep "launchable-activity" /tmp/badging.txt | sed -E "s/.*name='([^']+)'.*/\1/")
+          PKG=$(grep "package:" /tmp/badging.txt | sed -E "s/.*package: name='([^']+)'.*/\1/")
+          echo "launchable activity: $ACTIVITY"
+          echo "package: $PKG"
+          test "$ACTIVITY" = "id.realita62.lifeboard.MainActivity" || { echo "FAIL: launchable activity mismatch"; exit 1; }
+          test "$PKG" = "id.realita62.lifeboard" || { echo "FAIL: package mismatch"; exit 1; }
+          echo "OK: launchable activity and package match"
+
+      - name: Run integration smoke test on emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
@@ -114,15 +130,8 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           disable-animations: true
           emulator-boot-timeout: 600
-          script: |
-            set -e
-            echo "WORKSPACE=$GITHUB_WORKSPACE"
-            APK="$GITHUB_WORKSPACE/build/app/outputs/flutter-apk/app-debug.apk"
-            echo "Built APK: $APK"
-            test -f "$APK" || { echo "FAIL: APK not found"; exit 1; }
-            $ANDROID_HOME/build-tools/34.0.0/aapt dump badging "$APK" | grep -E "package|launchable-activity"
-            cd "$GITHUB_WORKSPACE"
-            flutter test integration_test/launch_smoke_test.dart
+          working-directory: ${{ github.workspace }}
+          script: flutter test integration_test/launch_smoke_test.dart
 
   build-apk:
     name: Build & Release APK
