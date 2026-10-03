@@ -1,0 +1,10 @@
+name: realita_engine
+description: "Pure-Dart deterministic rules engine for Realita +62: Life Board. ZERO Flutter imports; mirrors the legacy Kotlin engine bit-for-bit so the same seed plays identically across both platforms."
+version: 2.0.0
+publish_to: 'none'
+
+environment:
+  sdk: ^3.5.0
+
+dev_dependencies:
+  test: ^1.25.0

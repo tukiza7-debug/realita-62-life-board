@@ -1,0 +1,91 @@
+name: Bug report
+description: Report a bug in Realita +62: Life Board
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill in the fields
+        below — the more detail you include, the faster we can reproduce it.
+  - type: input
+    id: app-version
+    attributes:
+      label: App version
+      description: Settings → About → Version (or pubspec.yaml `version:`).
+      placeholder: 'e.g. 2.0.0+200'
+    validations:
+      required: true
+  - type: input
+    id: android-version
+    attributes:
+      label: Android version
+      description: Settings → About phone → Android version.
+      placeholder: 'e.g. Android 13 (API 33)'
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device model
+      placeholder: 'e.g. Samsung Galaxy A52 (SM-A525F)'
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language
+      options:
+        - English
+        - Bahasa Indonesia
+    validations:
+      required: true
+  - type: dropdown
+    id: orientation
+    attributes:
+      label: Orientation
+      options:
+        - Portrait
+        - Landscape
+        - Multi-window / split-screen
+        - Foldable (inner / outer)
+    validations:
+      required: true
+  - type: input
+    id: seed
+    attributes:
+      label: Game seed
+      description: Settings → About → Copy debug info (paste the seed here).
+      placeholder: 'e.g. seed=1727943200'
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What did you do? Numbered list preferred.
+      placeholder: |
+        1. Started a new game (3 players, 1 AI).
+        2. Player 2 rolled dice, landed on event tile.
+        3. Drew card E22 (Bribe Offer), chose "decline".
+        4. App froze.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+      description: What did you think would happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: What actually happened? If there was a crash, paste the stack trace.
+    validations:
+      required: true
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Attachments
+      description: Screenshots or screen recordings help a lot. Drag files here.

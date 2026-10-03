@@ -1,0 +1,37 @@
+name: realita62_life_board
+description: "Realita +62: Life Board - A Game-of-Life-style family board game blending Indonesian socio-economic reality."
+publish_to: 'none'
+
+# Single source of truth for version. CI overrides this with tag-derived version.
+# See .github/workflows/build-flutter-apk.yml.
+version: 2.0.0+200
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  shared_preferences: ^2.3.2
+  provider: ^6.1.2
+  collection: ^1.18.0
+  realita_engine:
+    path: packages/realita_engine
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/data/cards.json
+    - assets/brand/

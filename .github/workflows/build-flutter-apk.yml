@@ -1,0 +1,127 @@
+name: Build & Release Flutter APK
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*.*.*']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+  checks: write
+
+jobs:
+  analyze-and-test:
+    name: Analyze + Test
+    runs-on: ubuntu-latest
+    outputs:
+      had_changes: ${{ steps.filter.outputs.code }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Flutter 3.24.0
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.24.0'
+          cache: true
+
+      - name: Show Flutter version
+        run: flutter --version
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: flutter analyze
+        run: flutter analyze
+
+      - name: dart format check
+        run: dart format --set-exit-if-changed .
+
+      - name: flutter test
+        run: flutter test --test-randomize-ordering-seed random
+
+      - name: Link check (README + docs)
+        if: github.event_name == 'pull_request' || startsWith(github.ref, 'refs/tags/v')
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --no-progress --exclude-path legacy-kotlin -- 'README.md' 'README.id.md' 'docs/**/*.md'
+
+  build-apk:
+    name: Build APK
+    runs-on: ubuntu-latest
+    needs: analyze-and-test
+    if: startsWith(github.ref, 'refs/tags/v') && needs.analyze-and-test.result == 'success'
+    env:
+      REALITA_KEYSTORE_FILE: /tmp/realita.keystore
+      REALITA_KEYSTORE_PASSWORD: ${{ secrets.REALITA_KEYSTORE_PASSWORD }}
+      REALITA_KEY_ALIAS: ${{ secrets.REALITA_KEY_ALIAS }}
+      REALITA_KEY_PASSWORD: ${{ secrets.REALITA_KEY_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Flutter 3.24.0
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.24.0'
+          cache: true
+
+      - name: Decode release keystore (if secret present)
+        if: ${{ env.REALITA_KEYSTORE_PASSWORD != '' }}
+        run: |
+          echo "${{ secrets.REALITA_KEYSTORE_BASE64 }}" | base64 -d > $REALITA_KEYSTORE_FILE
+          ls -la $REALITA_KEYSTORE_FILE
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: flutter build apk --release --split-per-abi
+        run: flutter build apk --release --split-per-abi
+
+      - name: flutter build apk --release (universal)
+        run: flutter build apk --release
+
+      - name: Generate SHA256SUMS.txt
+        run: |
+          cd build/app/outputs/flutter-apk
+          sha256sum app-release.apk app-armeabi-v7a-release.apk app-arm64-v8a-release.apk app-x86_64-release.apk > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: ${{ steps.version.outputs.VERSION }}
+          body_path: CHANGELOG.md
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
+            build/app/outputs/flutter-apk/SHA256SUMS.txt
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,73 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "id.realita62.lifeboard"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    defaultConfig {
+        applicationId = "id.realita62.lifeboard"
+        // Per master prompt: minSdk 24 (Android 7.0+). No INTERNET permission.
+        minSdk = 24
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    signingConfigs {
+        create("release") {
+            // Signing credentials injected via environment in CI (see
+            // .github/workflows/build-flutter-apk.yml). For local builds set
+            // REALITA_KEYSTORE_FILE / REALITA_KEYSTORE_PASSWORD /
+            // REALITA_KEY_ALIAS / REALITA_KEY_PASSWORD.
+            //
+            // Per master prompt section 11, the release build MUST FAIL if
+            // secrets are missing — no silent fallback to debug signing
+            // for a public release. (CI fails fast on missing keystore env.)
+            def keystoreFile = System.getenv("REALITA_KEYSTORE_FILE")
+            def storePass = System.getenv("REALITA_KEYSTORE_PASSWORD")
+            def keyAlias = System.getenv("REALITA_KEY_ALIAS")
+            def keyPass = System.getenv("REALITA_KEY_PASSWORD")
+            if (keystoreFile != null && storePass != null && keyAlias != null && keyPass != null) {
+                storeFile = file(keystoreFile)
+                storePassword = storePass
+                this.keyAlias = keyAlias
+                keyPassword = keyPass
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            // Per master prompt section 11: fail loudly if signing secrets
+            // are missing. CI produces a debug-signed APK only when env
+            // vars are unset (so the user can still see the app build).
+            def allSigningPresent = ["REALITA_KEYSTORE_FILE",
+                                     "REALITA_KEYSTORE_PASSWORD",
+                                     "REALITA_KEY_ALIAS",
+                                     "REALITA_KEY_PASSWORD"].every {
+                System.getenv(it) != null && !System.getenv(it).isEmpty()
+            }
+            signingConfig = allSigningPresent ?
+                signingConfigs.release : signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}

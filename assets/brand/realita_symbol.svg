@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108" viewBox="0 0 108 108">
+  <!-- Background (batik red) -->
+  <rect width="108" height="108" fill="#B31919"/>
+  <!-- Winding board path forming the digits "62" — original work, geometric -->
+  <g fill="#FFF8E7">
+    <!-- "6" — three-quarters of a circle plus a tail -->
+    <path d="M 40 32 a 14 14 0 1 0 0 28 a 14 14 0 0 0 14 -14 l -8 0 a 6 6 0 1 1 -6 -6 l 0 -8 z" fill-rule="evenodd"/>
+    <!-- "2" — half-arc plus base plus diagonal -->
+    <path d="M 56 60 a 8 8 0 0 1 16 0 l 0 4 l -16 0 l 0 6 l 16 0 l 0 6 l -16 0 l 0 -6 l 8 -8 l 0 -2 a 4 4 0 0 0 -8 0 z" fill-rule="evenodd"/>
+  </g>
+  <!-- Pawn on tile (gold accent) -->
+  <circle cx="22" cy="86" r="6" fill="#D4A23A"/>
+  <rect x="16" y="92" width="12" height="4" fill="#D4A23A"/>
+  <rect x="14" y="96" width="16" height="4" fill="#D4A23A"/>
+  <!-- Subtle deep teal shadow under "62" -->
+  <ellipse cx="56" cy="58" rx="22" ry="2" fill="#0E5A4F" opacity="0.25"/>
+</svg>
