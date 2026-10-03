@@ -120,6 +120,20 @@ Test class: `app/src/test/java/id/realita62/lifeboard/engine/SimulationTest.kt`
   correctly enforced.
 - *SettingsScreen Column syntax* — missing `)` after `verticalArrangement`
   in `Column(...)` call. Fixed by closing the parentheses properly.
+- *Color literal `0xFF888`* — invalid 24-bit color, produced a fully
+  transparent green. Fixed to `Color(0xFF888888)`.
+- *Dead code in `GameViewModel.tick()`* — removed stray `MainScope().also { }`
+  that did nothing; autosave is handled by the Composable via `scope.launch`.
+- *Adaptive-icon minSdk conflict* — initial layout placed
+  `<adaptive-icon>` XMLs in `mipmap-mdpi/`, `mipmap-hdpi/` etc., which
+  Android resource linking rejected because `<adaptive-icon>` requires
+  API 26+ but `minSdk` is 24. Fixed by:
+  1. Moving `<adaptive-icon>` XMLs to `mipmap-anydpi-v26/` (used only on
+     API 26+).
+  2. Adding a vector-drawable fallback in `mipmap-anydpi/` for API 24–25
+     (with `vectorDrawables.useSupportLibrary = true` already set in
+     `app/build.gradle.kts`).
+  The CI build then completed cleanly.
 
 ## 7. Known Remaining Issues
 
