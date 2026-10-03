@@ -40,12 +40,12 @@ android {
             // for a public release. (CI fails fast on missing keystore env.)
             def keystoreFile = System.getenv("REALITA_KEYSTORE_FILE")
             def storePass = System.getenv("REALITA_KEYSTORE_PASSWORD")
-            def keyAlias = System.getenv("REALITA_KEY_ALIAS")
+            def keyAliasEnv = System.getenv("REALITA_KEY_ALIAS")
             def keyPass = System.getenv("REALITA_KEY_PASSWORD")
-            if (keystoreFile != null && storePass != null && keyAlias != null && keyPass != null) {
+            if (keystoreFile != null && storePass != null && keyAliasEnv != null && keyPass != null) {
                 storeFile = file(keystoreFile)
                 storePassword = storePass
-                this.keyAlias = keyAlias
+                keyAlias = keyAliasEnv
                 keyPassword = keyPass
             }
         }
