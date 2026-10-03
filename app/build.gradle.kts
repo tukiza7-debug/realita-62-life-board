@@ -43,8 +43,11 @@ android {
             versionNameSuffix = "-debug"
         }
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // Minify is disabled for the v1.0.0 release to avoid R8 ProGuard
+            // rule issues with kotlinx.serialization. Re-enabling is tracked
+            // as a follow-up — see docs/AUDIT.md §7.
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
