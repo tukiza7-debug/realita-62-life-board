@@ -12,8 +12,33 @@ if [ ! -f "$APK" ]; then
   exit 1
 fi
 
-echo "Installing APK..."
-adb -s emulator-5554 install -r -t "$APK"
+echo "Waiting for emulator to be fully ready (sys.boot_completed=1)..."
+for i in $(seq 1 60); do
+  BOOT=$(adb -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r\n')
+  if [ "$BOOT" = "1" ]; then
+    echo "Boot completed after ${i}s"
+    break
+  fi
+  sleep 1
+done
+# Give the package manager a moment to settle after boot.
+sleep 10
+
+echo "Installing APK (with retries)..."
+INSTALLED=0
+for i in $(seq 1 3); do
+  echo "Install attempt ${i}..."
+  if adb -s emulator-5554 install -r -t "$APK" 2>&1; then
+    INSTALLED=1
+    break
+  fi
+  echo "Install attempt ${i} failed; retrying in 5s..."
+  sleep 5
+done
+if [ "$INSTALLED" != "1" ]; then
+  echo "FAIL: could not install APK after 3 attempts"
+  exit 1
+fi
 
 echo "Clearing logcat..."
 adb -s emulator-5554 logcat -c
@@ -21,8 +46,8 @@ adb -s emulator-5554 logcat -c
 echo "Launching MainActivity..."
 adb -s emulator-5554 shell am start -n id.realita62.lifeboard/.MainActivity
 
-echo "Waiting for app to settle (20s)..."
-sleep 20
+echo "Waiting for app to settle (30s)..."
+sleep 30
 
 echo "=== Focused window (must contain id.realita62.lifeboard) ==="
 FOCUS=$(adb -s emulator-5554 shell dumpsys window | grep -E "mCurrentFocus|mFocusedApp" | head -2)
