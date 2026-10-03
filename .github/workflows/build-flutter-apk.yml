@@ -54,6 +54,7 @@ jobs:
         uses: lycheeverse/lychee-action@v2
         with:
           args: --no-progress --exclude-path legacy-kotlin -- 'README.md' 'README.id.md' 'docs/**/*.md'
+        continue-on-error: true  # lychee can fail to reach some Indonesian gov sites from GitHub runners
 
   build-apk:
     name: Build APK
