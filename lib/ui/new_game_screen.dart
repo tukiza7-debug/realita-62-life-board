@@ -86,9 +86,7 @@ class _NewGameScreenState extends State<NewGameScreen> {
                     ),
                     onChanged: (v) => names[i] = v,
                     controller: TextEditingController(
-                        text: names[i] == 'Player ${i + 1}'
-                            ? null
-                            : names[i]),
+                        text: names[i] == 'Player ${i + 1}' ? null : names[i]),
                   ),
                 ),
               const SizedBox(height: 24),

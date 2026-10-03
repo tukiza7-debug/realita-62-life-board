@@ -4,6 +4,8 @@
 /// the persistent HUD with cash, debt, happiness, career, route, etc.
 /// Plus: education/career picker, marriage/asset/mahar/retirement dialogs,
 /// card reveal overlay for Event/Luck, results dialog.
+// ignore_for_file: unnecessary_cast
+
 library;
 
 import 'package:flutter/material.dart';
@@ -43,6 +45,7 @@ class _GameScreenState extends State<GameScreen> {
     if (c == null) {
       // Corrupted save — fall back to New Game screen.
       await prefs.remove('saved_game');
+      if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/new_game');
       return;
     }
@@ -107,8 +110,7 @@ class _GameBody extends StatelessWidget {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isLandscape =
-                constraints.maxWidth > constraints.maxHeight;
+            final isLandscape = constraints.maxWidth > constraints.maxHeight;
             if (isLandscape) {
               return Row(
                 children: [
@@ -128,8 +130,7 @@ class _GameBody extends StatelessWidget {
                 Expanded(
                   child: _LogPanel(controller: controller),
                 ),
-                _ActionBar(
-                    controller: controller, onAutosave: onAutosave),
+                _ActionBar(controller: controller, onAutosave: onAutosave),
               ],
             );
           },
@@ -164,8 +165,7 @@ class _GameBody extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.settings),
               title: Text(l10n.pauseSettings),
-              onTap: () =>
-                  Navigator.pushNamed(context, '/settings'),
+              onTap: () => Navigator.pushNamed(context, '/settings'),
             ),
             ListTile(
               leading: const Icon(Icons.school),
@@ -176,8 +176,7 @@ class _GameBody extends StatelessWidget {
               leading: const Icon(Icons.restart_alt),
               title: Text(l10n.pauseRestart),
               onTap: () async {
-                final prefs =
-                    await SharedPreferences.getInstance();
+                final prefs = await SharedPreferences.getInstance();
                 await prefs.remove('saved_game');
                 if (context.mounted) {
                   Navigator.popUntil(context, (route) => route.isFirst);
@@ -209,9 +208,7 @@ class _HudStrip extends StatelessWidget {
           return SizedBox(
             width: 160,
             child: Card(
-              color: isCurrent
-                  ? Theme.of(context).colorScheme.primary
-                  : null,
+              color: isCurrent ? Theme.of(context).colorScheme.primary : null,
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Column(
@@ -219,32 +216,25 @@ class _HudStrip extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(p.isAI
-                            ? Icons.smart_toy
-                            : Icons.person),
+                        Icon(p.isAI ? Icons.smart_toy : Icons.person),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             p.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall,
+                            style: Theme.of(context).textTheme.labelSmall,
                           ),
                         ),
                       ],
                     ),
                     Text('Rp ${p.cash.toStringAsFixed(1)}M',
-                        style:
-                            Theme.of(context).textTheme.labelSmall),
+                        style: Theme.of(context).textTheme.labelSmall),
                     Text('H ${p.happiness}',
-                        style:
-                            Theme.of(context).textTheme.labelSmall),
+                        style: Theme.of(context).textTheme.labelSmall),
                     Text(
                       p.career?.id ?? '-',
-                      style:
-                          Theme.of(context).textTheme.labelSmall,
+                      style: Theme.of(context).textTheme.labelSmall,
                     ),
                     if (p.children.isNotEmpty)
                       Text('👶 ${p.children.length}',
@@ -266,9 +256,8 @@ class _BoardPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final board = controller.orchestrator.board;
-    final positions = controller.orchestrator.state.players
-        .map((p) => p.position)
-        .toList();
+    final positions =
+        controller.orchestrator.state.players.map((p) => p.position).toList();
     return SizedBox(
       height: 240,
       child: Card(
@@ -283,8 +272,8 @@ class _BoardPanel extends StatelessWidget {
               painter: BoardPainter(
                 tiles: board,
                 positions: positions,
-                currentPlayerIdx: controller
-                    .orchestrator.state.currentPlayerIdx,
+                currentPlayerIdx:
+                    controller.orchestrator.state.currentPlayerIdx,
               ),
             ),
           ),
@@ -308,21 +297,18 @@ class _LogPanel extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.gameLog,
-                style: Theme.of(context).textTheme.titleMedium),
+            Text(l10n.gameLog, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Expanded(
               child: log.isEmpty
-                  ? const Center(
-                      child: Text('No events yet — roll the dice.'))
+                  ? const Center(child: Text('No events yet — roll the dice.'))
                   : ListView.builder(
                       reverse: true,
                       itemCount: log.length > 50 ? 50 : log.length,
                       itemBuilder: (context, i) {
                         final ev = log[log.length - 1 - i];
                         return Text(formatEvent(ev),
-                            style:
-                                Theme.of(context).textTheme.bodyMedium);
+                            style: Theme.of(context).textTheme.bodyMedium);
                       },
                     ),
             ),
@@ -336,8 +322,7 @@ class _LogPanel extends StatelessWidget {
 class _ActionBar extends StatelessWidget {
   final GameController controller;
   final Future<void> Function() onAutosave;
-  const _ActionBar(
-      {required this.controller, required this.onAutosave});
+  const _ActionBar({required this.controller, required this.onAutosave});
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -384,8 +369,8 @@ class _ActionBar extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: ElevatedButton(
-                    onPressed: () => controller.assignCareer(
-                        state.currentPlayerIdx, c),
+                    onPressed: () =>
+                        controller.assignCareer(state.currentPlayerIdx, c),
                     child: Text(c.id),
                   ),
                 ),
@@ -418,8 +403,7 @@ class _ActionBar extends StatelessWidget {
 class _SidePanel extends StatelessWidget {
   final GameController controller;
   final Future<void> Function() onAutosave;
-  const _SidePanel(
-      {required this.controller, required this.onAutosave});
+  const _SidePanel({required this.controller, required this.onAutosave});
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -452,8 +436,7 @@ class BoardPainter extends CustomPainter {
     final cellH = size.height / rows;
     for (var i = 0; i < tiles.length && i < rows * cols; i++) {
       final row = i ~/ cols;
-      final col =
-          (row % 2 == 0) ? (i % cols) : (cols - 1 - (i % cols));
+      final col = (row % 2 == 0) ? (i % cols) : (cols - 1 - (i % cols));
       final cx = col * cellW + cellW / 2;
       final cy = row * cellH + cellH / 2;
       final paint = Paint()..color = colorFor(tiles[i].type);
@@ -465,8 +448,7 @@ class BoardPainter extends CustomPainter {
         ..strokeWidth = 2;
       // Just draw a thin white inner ring for non-blank tiles
       if (tiles[i].type != TileType.blank) {
-        canvas.drawCircle(
-            Offset(cx, cy), cellW * 0.20, iconPaint);
+        canvas.drawCircle(Offset(cx, cy), cellW * 0.20, iconPaint);
       }
       // Player markers
       for (var p = 0; p < positions.length; p++) {
@@ -520,24 +502,22 @@ class BoardPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant BoardPainter old) =>
-      positions != old.positions ||
-      currentPlayerIdx != old.currentPlayerIdx;
+  bool shouldRepaint(covariant BoardPainter oldDelegate) =>
+      positions != oldDelegate.positions ||
+      currentPlayerIdx != oldDelegate.currentPlayerIdx;
 }
 
 // ----------------------- Event formatting ----------------------------
 
 String formatEvent(GameEvent e) {
   return switch (e) {
-    Payday() =>
-      'Payday +${(e as Payday).amount}M (TAPERA ${(e).tapera}M)',
+    Payday() => 'Payday +${(e as Payday).amount}M (TAPERA ${(e).tapera}M)',
     PaydaySkipped() => 'Payday skipped (layoff)',
     LivingCost() => 'Living cost -${(e as LivingCost).amount}M',
     UktInterest() => 'UKT +${(e as UktInterest).amount}M',
     KprInterest() => 'KPR +${(e as KprInterest).amount}M',
     PinjolInterest() => 'Pinjol +${(e as PinjolInterest).amount}M',
-    SideBusinessPaid() =>
-      'Side business +${(e as SideBusinessPaid).amount}M',
+    SideBusinessPaid() => 'Side business +${(e as SideBusinessPaid).amount}M',
     SideBusinessEnded() => 'Side business ended',
     FuelSubsidyEnded() => 'Fuel subsidy recovered',
     LandlordRentEnded() => 'Rent stabilized',
@@ -545,32 +525,25 @@ String formatEvent(GameEvent e) {
     StoleProjectFunds() =>
       'Stole funds +${(e as StoleProjectFunds).amount}M (heat ${(e).newHeat})',
     KpkStingMiss() => 'KPK missed',
-    KpkStingCaught() =>
-      'KPK OTT! cash -${(e as KpkStingCaught).cashLost}M',
-    Married() =>
-      'Married (${(e as Married).lavish ? "Lavish" : "Modest"})',
+    KpkStingCaught() => 'KPK OTT! cash -${(e as KpkStingCaught).cashLost}M',
+    Married() => 'Married (${(e as Married).lavish ? "Lavish" : "Modest"})',
     ChildBorn() => 'Child born',
     SchoolFunded() =>
       'School ${(e as SchoolFunded).private ? "private" : "public"} -${(e).cost}M',
     EnteredPoliticianPath() =>
       'Entered politics (${(e as EnteredPoliticianPath).corrupt ? "Corrupt" : "Clean"})',
     PoliticianEntryFailed() => 'Politics entry failed',
-    NepotismPerk() =>
-      'Nepotism +${(e as NepotismPerk).gain}M',
-    Retired() =>
-      'Retired (${(e as Retired).choice.id}) score ${(e).score}M',
+    NepotismPerk() => 'Nepotism +${(e as NepotismPerk).gain}M',
+    Retired() => 'Retired (${(e as Retired).choice.id}) score ${(e).score}M',
     CardDrawn() => 'Card ${(e as CardDrawn).cardId}',
     CashDelta() =>
       '${(e as CashDelta).amount >= 0 ? "+" : ""}${(e).amount}M — ${(e).reason}',
     HappinessDelta() =>
       'H ${(e as HappinessDelta).delta >= 0 ? "+" : ""}${(e).delta} — ${(e).reason}',
     SkipTurn() => 'Skip ${(e as SkipTurn).laps} turn(s)',
-    Moved() =>
-      '${(e as Moved).fromTile}→${(e).toTile}',
-    LapCompleted() =>
-      'Lap ${(e as LapCompleted).laps}',
-    AssetPurchased() =>
-      'Bought ${(e as AssetPurchased).name}',
+    Moved() => '${(e as Moved).fromTile}→${(e).toTile}',
+    LapCompleted() => 'Lap ${(e as LapCompleted).laps}',
+    AssetPurchased() => 'Bought ${(e as AssetPurchased).name}',
     TokenAwarded() => 'Token: ${(e as TokenAwarded).token}',
     LoanTaken() =>
       'Loan ${(e as LoanTaken).principal}M @${((e).interestPct * 100).toInt()}%',

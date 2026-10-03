@@ -5,7 +5,6 @@
 /// the same seed.
 library;
 
-import 'package:realita_engine/src/balance_config.dart';
 import 'package:realita_engine/src/card_def.dart';
 import 'package:realita_engine/src/game_engine.dart';
 import 'package:realita_engine/src/game_event.dart';
@@ -64,7 +63,8 @@ class CardResolver {
     final balance = engine.balance;
 
     double badLuckAdjusted(double amount) {
-      if (p.cash >= balance.savingsBufferThreshold && card.id.startsWith('BL')) {
+      if (p.cash >= balance.savingsBufferThreshold &&
+          card.id.startsWith('BL')) {
         return amount * (1.0 - balance.badLuckCashReductionPct);
       }
       return amount;
@@ -107,8 +107,8 @@ class CardResolver {
           const principal = 3.0;
           p.pinjolDebt += principal;
           p.cash += principal;
-          ev.add(LoanTaken(
-              playerIdx, principal, balance.pinjolInterestPerLapPct));
+          ev.add(
+              LoanTaken(playerIdx, principal, balance.pinjolInterestPerLapPct));
         }
 
       case 'EVENT_KONDANGAN_MUDIK':
@@ -268,9 +268,8 @@ class CardResolver {
 
       case 'GL_OVERTIME_PAID':
         final c = p.career;
-        final amount = (c == Career.ojolDriver || c == Career.dailyWorker)
-            ? 2.0
-            : 3.0;
+        final amount =
+            (c == Career.ojolDriver || c == Career.dailyWorker) ? 2.0 : 3.0;
         cash(amount, 'Overtime paid');
 
       case 'GL_UNCLE_TREATS':
@@ -286,8 +285,7 @@ class CardResolver {
 
       case 'GL_LOAN_WAIVER':
         if (p.hasPinjol) {
-          final interest =
-              p.pinjolDebt * balance.pinjolInterestPerLapPct;
+          final interest = p.pinjolDebt * balance.pinjolInterestPerLapPct;
           p.pinjolDebt = (p.pinjolDebt - interest).clamp(0.0, double.infinity);
           ev.add(CashDelta(playerIdx, interest, 'Pinjol interest waived'));
         } else {
@@ -350,8 +348,7 @@ class CardResolver {
         h(-3, 'Gas melon langka');
 
       case 'BL_CONTRACT_NOT_RENEWED':
-        if (p.career != Career.pns &&
-            p.career?.isPolitician != true) {
+        if (p.career != Career.pns && p.career?.isPolitician != true) {
           p.skipsNextPayday = true;
           ev.add(DebtFlagged(playerIdx, 'contract_not_renewed'));
         }
@@ -455,8 +452,8 @@ class CardResolver {
           cash(-5.0, 'Private school fee');
           if (p.children.isNotEmpty) {
             final idx = p.children.length - 1;
-            p.children[idx] = p.children[idx]
-                .copyWith(isFunded: true, isPrivateSchool: true);
+            p.children[idx] =
+                p.children[idx].copyWith(isFunded: true, isPrivateSchool: true);
           }
         } else {
           h(-3, 'Public school');

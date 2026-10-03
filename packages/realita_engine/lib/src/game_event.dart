@@ -3,7 +3,6 @@
 library;
 
 import 'package:realita_engine/src/models.dart';
-import 'package:realita_engine/src/seeded_rng.dart';
 
 sealed class GameEvent {
   final int playerIdx;
@@ -121,8 +120,7 @@ class Retired extends GameEvent {
   final RetirementChoice choice;
   final double score;
   final bool wargaTeladan;
-  const Retired(int p, this.choice, this.score, this.wargaTeladan)
-      : super._(p);
+  const Retired(int p, this.choice, this.score, this.wargaTeladan) : super._(p);
 }
 
 class CardDrawn extends GameEvent {

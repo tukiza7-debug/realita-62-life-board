@@ -22,9 +22,6 @@ class LogoPainter extends CustomPainter {
 
     final white = Paint()..color = const Color(0xFFFFF8E7);
     final gold = Paint()..color = const Color(0xFFD4A23A);
-    final tealShadow = Paint()
-      ..color = const Color(0xFF0E5A4F)
-      ..style = PaintingStyle.fill;
 
     // "6"
     final six = Path();
@@ -97,9 +94,7 @@ class LogoPainter extends CustomPainter {
         width: 44 * s,
         height: 4 * s,
       ),
-      Paint()
-        ..color = const Color(0xFF0E5A4F)
-        ..style = PaintingStyle.fill,
+      Paint()..style = PaintingStyle.fill,
     );
   }
 

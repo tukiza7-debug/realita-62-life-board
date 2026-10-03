@@ -10,7 +10,7 @@ import 'package:realita_engine/realita_engine.dart';
 
 class GameController extends ChangeNotifier {
   GameController._(this._orch) : super();
-  late GameOrchestrator _orch;
+  late final GameOrchestrator _orch;
   GameOrchestrator get orchestrator => _orch;
 
   /// Load a saved game from a JSON string. Returns null if load fails
@@ -18,7 +18,8 @@ class GameController extends ChangeNotifier {
   static Future<GameController?> loadSaved(String json) async {
     try {
       final lib = await _loadCardLibrary();
-      final orch = GameOrchestrator.deserialize(json, lib, BalanceConfig.defaultConfig);
+      final orch =
+          GameOrchestrator.deserialize(json, lib, BalanceConfig.defaultConfig);
       return GameController._(orch);
     } catch (_) {
       return null;
@@ -52,9 +53,9 @@ class GameController extends ChangeNotifier {
 
   /// Load the card library from `assets/data/cards.json`.
   static Future<CardLibrary> _loadCardLibrary() async {
-    final jsonStr =
-        await rootBundle.loadString('assets/data/cards.json');
-    final lib = CardLibrary.fromJson(jsonDecode(jsonStr) as Map<String, dynamic>);
+    final jsonStr = await rootBundle.loadString('assets/data/cards.json');
+    final lib =
+        CardLibrary.fromJson(jsonDecode(jsonStr) as Map<String, dynamic>);
     // Defensive: verify card counts.
     assert(lib.events.length == 30,
         'Expected 30 event cards, got ${lib.events.length}');

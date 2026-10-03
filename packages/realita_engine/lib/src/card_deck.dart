@@ -3,13 +3,11 @@
 /// and the same pawn hops.
 library;
 
-import 'package:realita_engine/src/balance_config.dart';
 import 'package:realita_engine/src/board.dart';
 import 'package:realita_engine/src/card_def.dart';
 import 'package:realita_engine/src/game_engine.dart';
 import 'package:realita_engine/src/game_event.dart';
 import 'package:realita_engine/src/game_state.dart';
-import 'package:realita_engine/src/seeded_rng.dart';
 
 class CardDeck {
   final GameEngine engine;
@@ -47,7 +45,8 @@ class CardDeck {
       _goodLuckPile = List.of(library.goodLuck);
       engine.rng.shuffle(_goodLuckPile);
     }
-    if (state.goodLuckDrawsThisLap[playerIdx] >= engine.balance.maxGoodLuckPerLap) {
+    if (state.goodLuckDrawsThisLap[playerIdx] >=
+        engine.balance.maxGoodLuckPerLap) {
       return null;
     }
     state.goodLuckDrawsThisLap[playerIdx] =

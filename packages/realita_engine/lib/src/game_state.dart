@@ -3,8 +3,6 @@
 /// Flutter app (subject to schema versioning — see docs/ARCHITECTURE.md).
 library;
 
-import 'dart:convert';
-
 import 'package:realita_engine/src/models.dart';
 import 'package:realita_engine/src/seeded_rng.dart';
 import 'package:realita_engine/src/game_event.dart';

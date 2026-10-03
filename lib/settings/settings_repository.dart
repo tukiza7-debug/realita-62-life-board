@@ -8,10 +8,15 @@ library;
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum AppLocale { system, en, id }
+
 enum AppThemeMode { system, light, dark }
+
 enum OrientationMode { auto, portrait, landscape }
+
 enum MotionLevel { full, reduced, off }
+
 enum GameSpeed { normal, fast, instant }
+
 enum HapticIntensity { light, normal }
 
 const _kSchemaVersion = 1;
@@ -92,8 +97,7 @@ class AppSettings {
         locale: locale ?? this.locale,
         themeMode: themeMode ?? this.themeMode,
         highContrast: highContrast ?? this.highContrast,
-        colorblindSafeTiles:
-            colorblindSafeTiles ?? this.colorblindSafeTiles,
+        colorblindSafeTiles: colorblindSafeTiles ?? this.colorblindSafeTiles,
         orientation: orientation ?? this.orientation,
         keepScreenOn: keepScreenOn ?? this.keepScreenOn,
         masterVolume: masterVolume ?? this.masterVolume,
@@ -108,12 +112,10 @@ class AppSettings {
         skipOwnTurns: skipOwnTurns ?? this.skipOwnTurns,
         confirmPurchases: confirmPurchases ?? this.confirmPurchases,
         showTileHints: showTileHints ?? this.showTileHints,
-        showScoreEstimate:
-            showScoreEstimate ?? this.showScoreEstimate,
+        showScoreEstimate: showScoreEstimate ?? this.showScoreEstimate,
         screenReaderAnnouncements:
             screenReaderAnnouncements ?? this.screenReaderAnnouncements,
-        largerTouchTargets:
-            largerTouchTargets ?? this.largerTouchTargets,
+        largerTouchTargets: largerTouchTargets ?? this.largerTouchTargets,
       );
 }
 
@@ -168,8 +170,7 @@ class SettingsRepository {
       muteAll: _prefs.getBool(_muteAll) ?? false,
       hapticsEnabled: _prefs.getBool(_hapticsEnabled) ?? true,
       hapticIntensity: HapticIntensity.values.firstWhere(
-          (e) => e.name ==
-              (_prefs.getString(_hapticIntensity) ?? 'normal'),
+          (e) => e.name == (_prefs.getString(_hapticIntensity) ?? 'normal'),
           orElse: () => HapticIntensity.normal),
       motionLevel: MotionLevel.values.firstWhere(
           (e) => e.name == (_prefs.getString(_motionLevel) ?? 'full'),

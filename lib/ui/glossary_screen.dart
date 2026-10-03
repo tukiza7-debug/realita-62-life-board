@@ -31,10 +31,9 @@ class GlossaryScreen extends StatelessWidget {
                   children: [
                     Text(
                       isId ? t.shortId : t.shortEn,
-                      style:
-                          Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     Text(

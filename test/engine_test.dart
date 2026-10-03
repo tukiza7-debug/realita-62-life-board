@@ -12,8 +12,7 @@ void main() {
   Player newPlayer({Career? career, double cash = 5.0, int id = 0}) =>
       Player(id: id, name: 'P$id', career: career, cash: cash);
 
-  GameState newState(Player p, {BalanceConfig? balance}) =>
-      GameState(
+  GameState newState(Player p, {BalanceConfig? balance}) => GameState(
         seed: 42,
         players: [p],
         assetCatalogue: AssetCatalogue.defaultCatalogue,
@@ -74,11 +73,8 @@ void main() {
   test('KPR interest is 3% per lap on remaining principal', () {
     final engine = newEngine();
     final p = newPlayer(career: Career.pns)
-      ..assets.add(Asset(
-          id: 'apt',
-          name: 'Apartment',
-          price: 35.0,
-          remainingKpr: 28.0));
+      ..assets.add(
+          Asset(id: 'apt', name: 'Apartment', price: 35.0, remainingKpr: 28.0));
     final state = newState(p);
     engine.endOfLap(state, 0);
     expect(p.assets[0].remainingKpr, closeTo(28.84, 0.001));
@@ -141,11 +137,8 @@ void main() {
     final engine = newEngine();
     final p = newPlayer(career: Career.pns, cash: 10.0)
       ..happiness = 10
-      ..assets.add(Asset(
-          id: 'apt',
-          name: 'Apartment',
-          price: 35.0,
-          remainingKpr: 0.0));
+      ..assets.add(
+          Asset(id: 'apt', name: 'Apartment', price: 35.0, remainingKpr: 0.0));
     // 35 + 10 + (10 * 0.5) + 0 = 50
     expect(engine.finalScore(p), 50.0);
   });
@@ -216,7 +209,6 @@ void main() {
   // -------------------------------------------------------------------
 
   test('game state serializes and round-trips back', () {
-    final engine = newEngine();
     final p = newPlayer(career: Career.ojolDriver, cash: 7.0)
       ..uktDebt = 0.0
       ..happiness = 3;
@@ -263,8 +255,7 @@ void main() {
         isLuck: isLuck,
       );
 
-  test('EVENT_FUEL_SUBSIDY_REMOVED applies to Ojol and Daily Worker only',
-      () {
+  test('EVENT_FUEL_SUBSIDY_REMOVED applies to Ojol and Daily Worker only', () {
     final engine = newEngine();
     final resolver = CardResolver(engine);
     final balance = BalanceConfig.defaultConfig;
@@ -300,8 +291,7 @@ void main() {
     final engine = newEngine();
     final resolver = CardResolver(engine);
     final c = card('BL06', 'BL_HOSPITAL_BILL', isLuck: true);
-    final insured = newPlayer(career: Career.pns, cash: 5.0)
-      ..insurance = true;
+    final insured = newPlayer(career: Career.pns, cash: 5.0)..insurance = true;
     resolver.resolveImmediate(newState(insured), 0, c);
     expect(insured.cash, 5.0 - 4.0);
 
@@ -319,8 +309,7 @@ void main() {
     expect(p.cash, 6.0);
     expect(p.happiness, 4);
 
-    final indebted = newPlayer(career: Career.pns, cash: 5.0)
-      ..pinjolDebt = 1.0;
+    final indebted = newPlayer(career: Career.pns, cash: 5.0)..pinjolDebt = 1.0;
     resolver.resolveImmediate(newState(indebted), 0, c);
     expect(indebted.cash, 5.0);
     expect(indebted.happiness, 0);
@@ -427,8 +416,9 @@ GameState _stateFromJson(Map<String, dynamic> j) {
     gameOver: j['gameOver'] as bool? ?? false,
     drawnEvents: (j['drawnEvents'] as List?)?.cast<String>() ?? [],
     drawnLuck: (j['drawnLuck'] as List?)?.cast<String>() ?? [],
-    goodLuckDrawsThisLap:
-        (j['goodLuckDrawsThisLap'] as List?)?.map((e) => (e as num).toInt()).toList() ??
-            List.filled(players.length, 0),
+    goodLuckDrawsThisLap: (j['goodLuckDrawsThisLap'] as List?)
+            ?.map((e) => (e as num).toInt())
+            .toList() ??
+        List.filled(players.length, 0),
   );
 }

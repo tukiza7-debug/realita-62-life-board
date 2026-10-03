@@ -65,8 +65,7 @@ class SettingsScreen extends StatelessWidget {
               SwitchListTile(
                 title: Text(l10n.settingsAppearanceHighContrast),
                 value: s.highContrast,
-                onChanged: (v) =>
-                    _set(context, s.copyWith(highContrast: v)),
+                onChanged: (v) => _set(context, s.copyWith(highContrast: v)),
               ),
               SwitchListTile(
                 title: Text(l10n.settingsAppearanceColorblindSafe),
@@ -86,15 +85,13 @@ class SettingsScreen extends StatelessWidget {
                             child: Text(_orientationLabel(m, l10n)),
                           ))
                       .toList(),
-                  onChanged: (v) =>
-                      _set(context, s.copyWith(orientation: v)),
+                  onChanged: (v) => _set(context, s.copyWith(orientation: v)),
                 ),
               ),
               SwitchListTile(
                 title: Text(l10n.settingsDisplayKeepScreenOn),
                 value: s.keepScreenOn,
-                onChanged: (v) =>
-                    _set(context, s.copyWith(keepScreenOn: v)),
+                onChanged: (v) => _set(context, s.copyWith(keepScreenOn: v)),
               ),
             ]),
             _Section(l10n.settingsAudio, [
@@ -104,8 +101,7 @@ class SettingsScreen extends StatelessWidget {
                   value: s.masterVolume,
                   onChanged: s.muteAll
                       ? null
-                      : (v) =>
-                          _set(context, s.copyWith(masterVolume: v)),
+                      : (v) => _set(context, s.copyWith(masterVolume: v)),
                 ),
                 trailing: Text('${(s.masterVolume * 100).round()}%'),
               ),
@@ -115,8 +111,7 @@ class SettingsScreen extends StatelessWidget {
                   value: s.musicVolume,
                   onChanged: s.muteAll
                       ? null
-                      : (v) =>
-                          _set(context, s.copyWith(musicVolume: v)),
+                      : (v) => _set(context, s.copyWith(musicVolume: v)),
                 ),
                 trailing: Text('${(s.musicVolume * 100).round()}%'),
               ),
@@ -140,8 +135,7 @@ class SettingsScreen extends StatelessWidget {
               SwitchListTile(
                 title: Text(l10n.settingsHapticsEnabled),
                 value: s.hapticsEnabled,
-                onChanged: (v) =>
-                    _set(context, s.copyWith(hapticsEnabled: v)),
+                onChanged: (v) => _set(context, s.copyWith(hapticsEnabled: v)),
               ),
               ListTile(
                 title: Text(l10n.settingsHapticsIntensity),
@@ -153,8 +147,8 @@ class SettingsScreen extends StatelessWidget {
                             child: Text(_hapticIntensityLabel(m, l10n)),
                           ))
                       .toList(),
-                  onChanged: (v) => _set(
-                      context, s.copyWith(hapticIntensity: v)),
+                  onChanged: (v) =>
+                      _set(context, s.copyWith(hapticIntensity: v)),
                 ),
               ),
             ]),
@@ -169,8 +163,7 @@ class SettingsScreen extends StatelessWidget {
                             child: Text(_motionLevelLabel(m, l10n)),
                           ))
                       .toList(),
-                  onChanged: (v) =>
-                      _set(context, s.copyWith(motionLevel: v)),
+                  onChanged: (v) => _set(context, s.copyWith(motionLevel: v)),
                 ),
               ),
               ListTile(
@@ -183,8 +176,7 @@ class SettingsScreen extends StatelessWidget {
                             child: Text(_gameSpeedLabel(m, l10n)),
                           ))
                       .toList(),
-                  onChanged: (v) =>
-                      _set(context, s.copyWith(gameSpeed: v)),
+                  onChanged: (v) => _set(context, s.copyWith(gameSpeed: v)),
                 ),
               ),
               ListTile(
@@ -197,15 +189,13 @@ class SettingsScreen extends StatelessWidget {
                             child: Text(_gameSpeedLabel(m, l10n)),
                           ))
                       .toList(),
-                  onChanged: (v) =>
-                      _set(context, s.copyWith(aiSpeed: v)),
+                  onChanged: (v) => _set(context, s.copyWith(aiSpeed: v)),
                 ),
               ),
               SwitchListTile(
                 title: Text(l10n.settingsAnimationSkipOwnTurns),
                 value: s.skipOwnTurns,
-                onChanged: (v) =>
-                    _set(context, s.copyWith(skipOwnTurns: v)),
+                onChanged: (v) => _set(context, s.copyWith(skipOwnTurns: v)),
               ),
             ]),
             _Section(l10n.settingsGameplay, [
@@ -218,28 +208,27 @@ class SettingsScreen extends StatelessWidget {
               SwitchListTile(
                 title: Text(l10n.settingsGameplayShowTileHints),
                 value: s.showTileHints,
-                onChanged: (v) =>
-                    _set(context, s.copyWith(showTileHints: v)),
+                onChanged: (v) => _set(context, s.copyWith(showTileHints: v)),
               ),
               SwitchListTile(
                 title: Text(l10n.settingsGameplayShowScoreEstimate),
                 value: s.showScoreEstimate,
-                onChanged: (v) => _set(
-                    context, s.copyWith(showScoreEstimate: v)),
+                onChanged: (v) =>
+                    _set(context, s.copyWith(showScoreEstimate: v)),
               ),
             ]),
             _Section(l10n.settingsAccessibility, [
               SwitchListTile(
                 title: Text(l10n.settingsAccessibilityScreenReader),
                 value: s.screenReaderAnnouncements,
-                onChanged: (v) => _set(context,
-                    s.copyWith(screenReaderAnnouncements: v)),
+                onChanged: (v) =>
+                    _set(context, s.copyWith(screenReaderAnnouncements: v)),
               ),
               SwitchListTile(
                 title: Text(l10n.settingsAccessibilityLargerTouchTargets),
                 value: s.largerTouchTargets,
-                onChanged: (v) => _set(
-                    context, s.copyWith(largerTouchTargets: v)),
+                onChanged: (v) =>
+                    _set(context, s.copyWith(largerTouchTargets: v)),
               ),
             ]),
             _Section(l10n.settingsData, [
@@ -264,12 +253,12 @@ class SettingsScreen extends StatelessWidget {
               ListTile(
                 title: Text(l10n.settingsAboutCredits),
                 onTap: () => _showString(context, 'CREDITS.md',
-                  'See CREDITS.md in the repository root.'),
+                    'See CREDITS.md in the repository root.'),
               ),
               ListTile(
                 title: Text(l10n.settingsAboutGithub),
                 onTap: () => _showString(context, 'GitHub',
-                  'https://github.com/tukiza7-debug/realita-62-life-board'),
+                    'https://github.com/tukiza7-debug/realita-62-life-board'),
               ),
               ListTile(
                 title: Text(l10n.settingsAboutPrivacy),
@@ -322,8 +311,7 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
-  void _confirmReset(
-      BuildContext context, AppSettingsNotifier notifier) async {
+  void _confirmReset(BuildContext context, AppSettingsNotifier notifier) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -351,15 +339,13 @@ class SettingsScreen extends StatelessWidget {
         content: Text(body),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK')),
+              onPressed: () => Navigator.pop(context), child: const Text('OK')),
         ],
       ),
     );
   }
 
-  String _themeModeLabel(AppThemeMode m, AppLocalizations l10n) =>
-      switch (m) {
+  String _themeModeLabel(AppThemeMode m, AppLocalizations l10n) => switch (m) {
         AppThemeMode.system => l10n.settingsAppearanceThemeSystem,
         AppThemeMode.light => l10n.settingsAppearanceThemeLight,
         AppThemeMode.dark => l10n.settingsAppearanceThemeDark,
@@ -368,28 +354,23 @@ class SettingsScreen extends StatelessWidget {
   String _orientationLabel(OrientationMode m, AppLocalizations l10n) =>
       switch (m) {
         OrientationMode.auto => l10n.settingsDisplayOrientationAuto,
-        OrientationMode.portrait =>
-          l10n.settingsDisplayOrientationPortrait,
-        OrientationMode.landscape =>
-          l10n.settingsDisplayOrientationLandscape,
+        OrientationMode.portrait => l10n.settingsDisplayOrientationPortrait,
+        OrientationMode.landscape => l10n.settingsDisplayOrientationLandscape,
       };
 
-  String _motionLevelLabel(MotionLevel m, AppLocalizations l10n) =>
-      switch (m) {
+  String _motionLevelLabel(MotionLevel m, AppLocalizations l10n) => switch (m) {
         MotionLevel.full => l10n.settingsAnimationMotionFull,
         MotionLevel.reduced => l10n.settingsAnimationMotionReduced,
         MotionLevel.off => l10n.settingsAnimationMotionOff,
       };
 
-  String _gameSpeedLabel(GameSpeed s, AppLocalizations l10n) =>
-      switch (s) {
+  String _gameSpeedLabel(GameSpeed s, AppLocalizations l10n) => switch (s) {
         GameSpeed.normal => l10n.settingsAnimationGameSpeedNormal,
         GameSpeed.fast => l10n.settingsAnimationGameSpeedFast,
         GameSpeed.instant => l10n.settingsAnimationGameSpeedInstant,
       };
 
-  String _hapticIntensityLabel(
-          HapticIntensity s, AppLocalizations l10n) =>
+  String _hapticIntensityLabel(HapticIntensity s, AppLocalizations l10n) =>
       switch (s) {
         HapticIntensity.light => l10n.settingsHapticsIntensityLight,
         HapticIntensity.normal => l10n.settingsHapticsIntensityNormal,
@@ -407,8 +388,7 @@ class _Section extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 16, 8, 4),
-          child: Text(title,
-              style: Theme.of(context).textTheme.titleMedium),
+          child: Text(title, style: Theme.of(context).textTheme.titleMedium),
         ),
         Card(child: Column(children: children)),
       ],

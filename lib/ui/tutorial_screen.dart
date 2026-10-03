@@ -25,8 +25,8 @@ class TutorialScreen extends StatelessWidget {
           itemBuilder: (context, i) => Card(
             child: Padding(
               padding: const EdgeInsets.all(12),
-              child: Text(steps[i],
-                  style: Theme.of(context).textTheme.bodyMedium),
+              child:
+                  Text(steps[i], style: Theme.of(context).textTheme.bodyMedium),
             ),
           ),
         ),

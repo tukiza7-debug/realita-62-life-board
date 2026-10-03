@@ -3,8 +3,6 @@
 /// produces the same game.
 library;
 
-import 'dart:math' as math;
-
 import 'package:realita_engine/src/balance_config.dart';
 import 'package:realita_engine/src/game_event.dart';
 import 'package:realita_engine/src/game_state.dart';
@@ -103,7 +101,8 @@ class GameEngine {
       final rate = balance.kprInterestBasePerLapPct +
           (asset.kprInterestBoostLapsLeft > 0 ? 0.01 : 0.0);
       final interest = asset.remainingKpr * rate;
-      asset.remainingKpr = (asset.remainingKpr + interest).clamp(0.0, double.infinity);
+      asset.remainingKpr =
+          (asset.remainingKpr + interest).clamp(0.0, double.infinity);
       if (asset.kprInterestBoostLapsLeft > 0) {
         asset.kprInterestBoostLapsLeft -= 1;
       }
@@ -114,8 +113,7 @@ class GameEngine {
     if (p.pinjolDebt > 0.001) {
       final interest = p.pinjolDebt * balance.pinjolInterestPerLapPct;
       p.pinjolDebt += interest;
-      p.pinjolInterestNextLap =
-          p.pinjolDebt * balance.pinjolInterestPerLapPct;
+      p.pinjolInterestNextLap = p.pinjolDebt * balance.pinjolInterestPerLapPct;
       events.add(PinjolInterest(playerIdx, interest));
     } else {
       p.pinjolInterestNextLap = 0.0;
@@ -167,8 +165,7 @@ class GameEngine {
 
   /// Purchase an asset with 12% PPN, 20% down, 80% KPR. Mirrors Kotlin
   /// `purchaseAsset()`.
-  PurchaseResult purchaseAsset(
-      GameState state, int playerIdx, String assetId) {
+  PurchaseResult purchaseAsset(GameState state, int playerIdx, String assetId) {
     final p = state.players[playerIdx];
     final def = state.assetCatalogue.items
         .cast<AssetDef?>()
@@ -215,8 +212,8 @@ class GameEngine {
   List<GameEvent> rollKpkSting(GameState state, int playerIdx) {
     final p = state.players[playerIdx];
     if (p.career != Career.politicianCorrupt) return [];
-    final chance = (p.corruptionHeat * balance.kpkStingChancePerHeatPct)
-        .clamp(0.0, 1.0);
+    final chance =
+        (p.corruptionHeat * balance.kpkStingChancePerHeatPct).clamp(0.0, 1.0);
     if (!rng.chance(chance)) {
       return [KpkStingMiss(playerIdx)];
     }
@@ -310,7 +307,8 @@ class GameEngine {
     final cost = privateSchool ? 5.0 : 1.5;
     p.cash -= cost;
     final c = p.children[childIdx];
-    p.children[childIdx] = c.copyWith(isFunded: true, isPrivateSchool: privateSchool);
+    p.children[childIdx] =
+        c.copyWith(isFunded: true, isPrivateSchool: privateSchool);
     return [SchoolFunded(playerIdx, childIdx, privateSchool, cost)];
   }
 
@@ -318,8 +316,8 @@ class GameEngine {
   // POLITICIAN PATH
   // -------------------------------------------------------------------
 
-  List<GameEvent> enterPoliticianPath(
-      GameState state, int playerIdx, {required bool corrupt}) {
+  List<GameEvent> enterPoliticianPath(GameState state, int playerIdx,
+      {required bool corrupt}) {
     final p = state.players[playerIdx];
     if (p.cash < balance.partyDowry) {
       return [PoliticianEntryFailed(playerIdx, 'Not enough cash')];
@@ -354,6 +352,5 @@ class GameEngine {
     return [Retired(playerIdx, choice, score, isWargaTeladan(p))];
   }
 
-  bool isGameOver(GameState state) =>
-      state.players.every((p) => p.retired);
+  bool isGameOver(GameState state) => state.players.every((p) => p.retired);
 }

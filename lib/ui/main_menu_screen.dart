@@ -5,10 +5,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../settings/settings_repository.dart';
 import 'main_menu_screen_imports.dart' as menu;
 
 class MainMenuScreen extends StatelessWidget {
@@ -21,7 +19,6 @@ class MainMenuScreen extends StatelessWidget {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isCompact = constraints.maxWidth < 600;
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -72,22 +69,26 @@ class MainMenuScreen extends StatelessWidget {
                           icon: Icons.play_arrow,
                           label: l10n.menuNewGame,
                           primary: true,
-                          onTap: () => Navigator.pushNamed(context, '/new_game'),
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/new_game'),
                         ),
                         _MenuButton(
                           icon: Icons.school,
                           label: l10n.menuTutorial,
-                          onTap: () => Navigator.pushNamed(context, '/tutorial'),
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/tutorial'),
                         ),
                         _MenuButton(
                           icon: Icons.menu_book,
                           label: l10n.menuGlossary,
-                          onTap: () => Navigator.pushNamed(context, '/glossary'),
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/glossary'),
                         ),
                         _MenuButton(
                           icon: Icons.settings,
                           label: l10n.menuSettings,
-                          onTap: () => Navigator.pushNamed(context, '/settings'),
+                          onTap: () =>
+                              Navigator.pushNamed(context, '/settings'),
                         ),
                       ],
                     ),

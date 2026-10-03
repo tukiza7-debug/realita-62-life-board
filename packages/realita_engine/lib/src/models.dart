@@ -1,8 +1,6 @@
 /// All monetary values are stored in **Rupiah millions** (Rp 1M = Rp 1.000.000).
 library;
 
-import 'package:realita_engine/src/seeded_rng.dart';
-
 typedef Rp = double; // millions
 
 enum Career {
@@ -11,10 +9,10 @@ enum Career {
   scbdEmployee('scbd', 12.0, 'SCBD Employee', 'Karyawan SCBD'),
   pns('pns', 9.0, 'Civil Servant (PNS)', 'PNS'),
   contractor('contractor', 8.0, 'Contractor', 'Kontraktor'),
-  politicianClean('politician_clean', 7.0, 'Politician (Clean)',
-      'Politikus (Bersih)'),
-  politicianCorrupt('politician_corrupt', 7.0, 'Politician (Corrupt)',
-      'Politikus (Korupsi)');
+  politicianClean(
+      'politician_clean', 7.0, 'Politician (Clean)', 'Politikus (Bersih)'),
+  politicianCorrupt(
+      'politician_corrupt', 7.0, 'Politician (Corrupt)', 'Politikus (Korupsi)');
 
   final String id;
   final double grossPayday;
@@ -180,8 +178,7 @@ class PlayerTokens {
   factory PlayerTokens.fromJson(Map<String, dynamic> j) => PlayerTokens(
         skipTurnLoss: (j['skipTurnLoss'] as num?)?.toInt() ?? 0,
         cancelNegativeEvent: (j['cancelNegativeEvent'] as num?)?.toInt() ?? 0,
-        waiveNextSchoolFee:
-            (j['waiveNextSchoolFee'] as num?)?.toInt() ?? 0,
+        waiveNextSchoolFee: (j['waiveNextSchoolFee'] as num?)?.toInt() ?? 0,
         clinicCostCancel: (j['clinicCostCancel'] as num?)?.toInt() ?? 0,
       );
 }
@@ -262,8 +259,7 @@ class Player {
   double totalDebt() =>
       uktDebt + pinjolDebt + assets.fold(0.0, (s, a) => s + a.remainingKpr);
 
-  double netAssets() =>
-      assets.fold(0.0, (s, a) => s + a.netValue);
+  double netAssets() => assets.fold(0.0, (s, a) => s + a.netValue);
 
   bool get hasPinjol => pinjolDebt > 0.001;
   bool get hasKpr => assets.any((a) => a.hasKpr);
@@ -274,12 +270,10 @@ class Player {
   /// discount and landlord extra.
   double livingCostThisLap(double baseCost, double perChild) {
     final raw = baseCost + children.length * perChild;
-    final discount = cheapRentDiscountLapsLeft > 0
-        ? raw * cheapRentDiscountPct
-        : 0.0;
-    final rentExtra = landlordRentExtraLapsLeft > 0
-        ? landlordRentExtraPerLap
-        : 0.0;
+    final discount =
+        cheapRentDiscountLapsLeft > 0 ? raw * cheapRentDiscountPct : 0.0;
+    final rentExtra =
+        landlordRentExtraLapsLeft > 0 ? landlordRentExtraPerLap : 0.0;
     final v = raw - discount + rentExtra;
     return v < 0 ? 0.0 : v;
   }
@@ -324,19 +318,17 @@ class Player {
         id: (j['id'] as num).toInt(),
         name: j['name'] as String,
         isAI: j['isAI'] as bool? ?? false,
-        career: j['career'] == null
-            ? null
-            : Career.fromId(j['career'] as String),
+        career:
+            j['career'] == null ? null : Career.fromId(j['career'] as String),
         education: j['education'] == null
             ? null
             : EducationPath.fromId(j['education'] as String),
-        maritalStatus: MaritalStatus.values.byName(
-            (j['maritalStatus'] as String?) ?? 'single'),
+        maritalStatus: MaritalStatus.values
+            .byName((j['maritalStatus'] as String?) ?? 'single'),
         children: (j['children'] as List? ?? [])
             .map((c) => Child.fromJson(c as Map<String, dynamic>))
             .toList(),
-        route: Route.values
-            .byName((j['route'] as String?) ?? 'none'),
+        route: Route.values.byName((j['route'] as String?) ?? 'none'),
         cash: (j['cash'] as num?)?.toDouble() ?? 0.0,
         happiness: (j['happiness'] as num?)?.toInt() ?? 0,
         position: (j['position'] as num?)?.toInt() ?? 0,
@@ -351,16 +343,13 @@ class Player {
         insurance: j['insurance'] as bool? ?? false,
         tokens: PlayerTokens.fromJson(
             (j['tokens'] as Map? ?? {}).cast<String, dynamic>()),
-        corruptionHeat:
-            (j['corruptionHeat'] as num?)?.toInt() ?? 0,
+        corruptionHeat: (j['corruptionHeat'] as num?)?.toInt() ?? 0,
         skipsNextTurn: j['skipsNextTurn'] as bool? ?? false,
         skipsNextPayday: j['skipsNextPayday'] as bool? ?? false,
         fuelSubsidyExtraPerRoll:
             (j['fuelSubsidyExtraPerRoll'] as num?)?.toDouble() ?? 0.0,
-        fuelSubsidyLapsLeft:
-            (j['fuelSubsidyLapsLeft'] as num?)?.toInt() ?? 0,
-        sideBusinessLapsLeft:
-            (j['sideBusinessLapsLeft'] as num?)?.toInt() ?? 0,
+        fuelSubsidyLapsLeft: (j['fuelSubsidyLapsLeft'] as num?)?.toInt() ?? 0,
+        sideBusinessLapsLeft: (j['sideBusinessLapsLeft'] as num?)?.toInt() ?? 0,
         sideBusinessIncomePerLap:
             (j['sideBusinessIncomePerLap'] as num?)?.toDouble() ?? 0.0,
         landlordRentExtraLapsLeft:
@@ -395,11 +384,11 @@ class AssetCatalogue {
   const AssetCatalogue(this.items);
 
   static const AssetCatalogue defaultCatalogue = AssetCatalogue([
-    AssetDef('kampung_house', 'Small Kampung House', 'Rumah Kampung Kecil',
-        20.0),
+    AssetDef(
+        'kampung_house', 'Small Kampung House', 'Rumah Kampung Kecil', 20.0),
     AssetDef('apartment', 'Apartment', 'Apartemen', 35.0),
     AssetDef('jogja_land', 'Land in Jogja/Bali', 'Tanah di Jogja/Bali', 40.0),
-    AssetDef('menteng_mansion', 'Menteng Mansion', 'Rumah Besar Menteng',
-        120.0),
+    AssetDef(
+        'menteng_mansion', 'Menteng Mansion', 'Rumah Besar Menteng', 120.0),
   ]);
 }

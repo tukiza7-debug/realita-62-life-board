@@ -258,15 +258,14 @@ class GameOrchestrator {
       seed: (j['seed'] as num).toInt(),
       players: players,
       turn: (j['turn'] as num?)?.toInt() ?? 0,
-      currentPlayerIdx:
-          (j['currentPlayerIdx'] as num?)?.toInt() ?? 0,
+      currentPlayerIdx: (j['currentPlayerIdx'] as num?)?.toInt() ?? 0,
       gameOver: j['gameOver'] as bool? ?? false,
-      drawnEvents:
-          (j['drawnEvents'] as List?)?.cast<String>() ?? [],
+      drawnEvents: (j['drawnEvents'] as List?)?.cast<String>() ?? [],
       drawnLuck: (j['drawnLuck'] as List?)?.cast<String>() ?? [],
-      goodLuckDrawsThisLap:
-          (j['goodLuckDrawsThisLap'] as List?)?.map((e) => (e as num).toInt()).toList() ??
-              List.filled(players.length, 0),
+      goodLuckDrawsThisLap: (j['goodLuckDrawsThisLap'] as List?)
+              ?.map((e) => (e as num).toInt())
+              .toList() ??
+          List.filled(players.length, 0),
     );
   }
 
