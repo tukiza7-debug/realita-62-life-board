@@ -1,5 +1,6 @@
 package id.realita62.lifeboard.engine
 
+import kotlinx.serialization.Serializable
 import kotlin.math.absoluteValue
 import kotlin.math.log10
 import kotlin.math.pow
